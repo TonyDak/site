@@ -84,6 +84,7 @@ export type PortfolioContent = {
     about: string;
     contact: string;
     languageLabel: string;
+    cvLabel: string;
   };
   contactForm: {
     nameLabel: string;

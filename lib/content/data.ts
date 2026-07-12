@@ -61,7 +61,7 @@ export const portfolioContent = {
         { label: "Current focus", title: "Production web, mobile, and backend delivery", detail: "Building with Next.js, React Native, NestJS, and ASP.NET Core while designing databases, integrating APIs, and resolving production issues." },
         { label: "Continuous learning", title: "Distributed systems and backend architecture", detail: "Exploring microservices, event-driven architecture, Docker, Kafka, Redis, and scalable service-to-service communication through personal projects." },
       ],
-      skills: ["Next.js", "React Native", "TypeScript", "NestJS", "ASP.NET Core", "Spring Boot", "PostgreSQL", "MongoDB", "MySQL", "Docker", "Git", "REST API", "WebSocket", "Clean Architecture"],
+      skills: ["Next.js", "React Native", "TypeScript", "NestJS", "ASP.NET Core", "Spring Boot", "PostgreSQL", "MongoDB", "MySQL", "Docker", "Git"],
       personalProject: {
         title: "Microservice Social Platform",
         role: "Backend Developer · Learning Project",
@@ -69,7 +69,7 @@ export const portfolioContent = {
         focus: ["API Gateway and service discovery", "JWT authentication and Keycloak", "Event-driven communication with Kafka", "Distributed cache with Redis", "Docker deployment and service-to-service communication"],
       },
     },
-    navigation: { home: "Home", about: "About", contact: "Contact", languageLabel: "Switch to Vietnamese" },
+    navigation: { home: "Home", about: "About", contact: "Contact", languageLabel: "Switch to Vietnamese", cvLabel: "Download CV" },
     contactForm: { nameLabel: "Name", emailLabel: "Email", detailsLabel: "Project details", submitLabel: "Open Gmail draft", sendingLabel: "Opening Gmail...", successMessage: "A Gmail draft is ready. Review it, then send.", genericError: "Could not open Gmail. Please try again.", networkError: "Network issue. Please try again in a moment." },
   },
   vi: {
@@ -124,7 +124,7 @@ export const portfolioContent = {
         { label: "Trọng tâm hiện tại", title: "Phát triển web, mobile và backend cho production", detail: "Xây dựng với Next.js, React Native, NestJS và ASP.NET Core; đồng thời thiết kế cơ sở dữ liệu, tích hợp API và xử lý vấn đề production." },
         { label: "Học tập liên tục", title: "Hệ thống phân tán và kiến trúc backend", detail: "Tìm hiểu microservices, event-driven architecture, Docker, Kafka, Redis và giao tiếp giữa các dịch vụ qua dự án cá nhân." },
       ],
-      skills: ["Next.js", "React Native", "TypeScript", "NestJS", "ASP.NET Core", "Spring Boot", "PostgreSQL", "MongoDB", "MySQL", "Docker", "Git", "REST API", "WebSocket", "Clean Architecture"],
+      skills: ["Next.js", "React Native", "TypeScript", "NestJS", "ASP.NET Core", "Spring Boot", "PostgreSQL", "MongoDB", "MySQL", "Docker", "Git"],
       personalProject: {
         title: "Nền tảng Mạng xã hội Microservice",
         role: "Backend Developer · Dự án học tập",
@@ -132,7 +132,7 @@ export const portfolioContent = {
         focus: ["API Gateway và service discovery", "JWT authentication và Keycloak", "Giao tiếp event-driven với Kafka", "Distributed cache với Redis", "Triển khai Docker và giao tiếp giữa các service"],
       },
     },
-    navigation: { home: "Trang chủ", about: "Giới thiệu", contact: "Liên hệ", languageLabel: "Chuyển sang tiếng Anh" },
+    navigation: { home: "Trang chủ", about: "Giới thiệu", contact: "Liên hệ", languageLabel: "Chuyển sang tiếng Anh", cvLabel: "Tải CV" },
     contactForm: { nameLabel: "Họ và tên", emailLabel: "Email", detailsLabel: "Thông tin dự án", submitLabel: "Mở bản nháp Gmail", sendingLabel: "Đang mở Gmail...", successMessage: "Bản nháp Gmail đã sẵn sàng. Hãy kiểm tra rồi gửi.", genericError: "Không thể mở Gmail. Vui lòng thử lại.", networkError: "Lỗi kết nối. Vui lòng thử lại sau ít phút." },
   },
 } satisfies Record<Locale, PortfolioContent>;

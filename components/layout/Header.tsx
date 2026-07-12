@@ -20,7 +20,7 @@ export function Header() {
                 <TransitionLink href="/" className="c--brand c--brand-tony">
                     {site.name.endsWith("dev") ? (
                         <>
-                            {site.name.slice(0, -3)}
+                            ducnguyen.
                             <span>dev</span>
                         </>
                     ) : (
@@ -35,6 +35,7 @@ export function Header() {
                     ))}
                 </nav>
                 <div className="c--header-actions">
+                    <a href="/cv.pdf" download="Nguyen-Huu-Duc-CV.pdf" className="c--cv-download"><svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M12 3v11m0 0 4-4m-4 4-4-4M5 18v2h14v-2" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round" /></svg><span>{navigation.cvLabel}</span></a>
                     <LanguageToggle />
                     <ThemeToggle />
                 </div>

@@ -35,6 +35,11 @@ p {
   gap: 10px;
 }
 
+.c--cv-download { min-height:40px;display:inline-flex;align-items:center;gap:7px;padding:0 12px;border:1px solid var(--border);border-radius:var(--radius-pill);color:var(--text);background:var(--bg-elevated);font-size:.78rem;font-weight:700; }
+.c--cv-download:hover,.c--cv-download:focus-visible { color:var(--brand);border-color:var(--brand); }
+.c--cv-download svg { width:16px;height:16px; }
+.c--gravity-field { position:fixed;inset:0;z-index:5;pointer-events:none;mix-blend-mode:multiply; }
+
 .c--brand {
   font-family: var(--font-heading), "Segoe UI", sans-serif;
   font-size: 1.25rem;
@@ -1308,6 +1313,9 @@ html.theme-light .c--cta-stat-num {
   .c--header-actions {
     gap: 6px;
   }
+
+  .c--cv-download { width:40px;padding:0;justify-content:center; }
+  .c--cv-download span { display:none; }
 
   .c--grid-3 {
     grid-template-columns: 1fr;

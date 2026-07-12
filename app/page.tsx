@@ -2,6 +2,7 @@
 
 import Image from "next/image";
 import { useLanguage } from "@/components/language/LanguageProvider";
+import { GravityField } from "@/components/motion/GravityField";
 import { Reveal } from "@/components/motion/Reveal";
 import { TransitionLink } from "@/components/motion/TransitionLink";
 
@@ -19,6 +20,7 @@ export default function Home() {
 
   return (
     <>
+      <GravityField />
       <section className="c--hero c--home-hero">
         <div className="u--container">
           <div className="c--hero-split">
