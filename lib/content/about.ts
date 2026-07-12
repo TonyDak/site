@@ -1,12 +1,8 @@
-import { getContentRepository } from "@/lib/admin/content-repository";
-import type { AboutContent } from "@/lib/admin/content-models";
+import { aboutContent } from "./data";
+import type { AboutContent } from "./types";
 
-export type { AboutContent } from "@/lib/admin/content-models";
+export type { AboutContent } from "./types";
 
-export async function getAboutContent() {
-  return getContentRepository().getAboutContent();
-}
-
-export async function saveAboutContent(value: AboutContent) {
-  await getContentRepository().saveAboutContent(value);
+export function getAboutContent(): AboutContent {
+  return aboutContent;
 }

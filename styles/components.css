@@ -26,6 +26,13 @@ p {
   display: flex;
   align-items: center;
   justify-content: space-between;
+  gap: var(--space-2);
+}
+
+.c--header-actions {
+  display: flex;
+  align-items: center;
+  gap: 10px;
 }
 
 .c--brand {
@@ -745,6 +752,83 @@ html.theme-light .c--cta-stat-num {
   gap: var(--space-3);
 }
 
+.c--home-hero .c--hero-split {
+  min-height: 0;
+  padding: 96px 0 54px;
+  align-items: center;
+}
+
+.c--home-hero {
+  padding: 0;
+}
+
+.c--home-hero .c--hero-content {
+  max-width: 640px;
+}
+
+.c--home-hero .c--hero-subtitle {
+  max-width: 58ch;
+}
+
+.c--capability-strip {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  margin: 0 0 var(--space-5);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  background: color-mix(in srgb, var(--bg-elevated) 92%, transparent);
+  box-shadow: 0 18px 38px -34px color-mix(in srgb, var(--brand) 55%, transparent);
+  overflow: hidden;
+}
+
+.c--capability {
+  min-height: 112px;
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 24px 34px;
+  color: var(--text);
+  font-weight: 700;
+}
+
+.c--capability + .c--capability {
+  border-left: 1px solid var(--border);
+}
+
+.c--capability-icon {
+  width: 44px;
+  height: 44px;
+  border: 1px solid color-mix(in srgb, var(--brand) 26%, var(--border));
+  border-radius: 14px;
+  display: grid;
+  place-items: center;
+  color: var(--brand);
+  background: color-mix(in srgb, var(--brand) 7%, transparent);
+  flex: 0 0 auto;
+}
+
+.c--capability-icon svg {
+  width: 22px;
+  height: 22px;
+}
+
+.c--about-projects {
+  margin-top: var(--space-5);
+}
+
+.c--personal-project {
+  margin-top: var(--space-5);
+}
+
+.c--personal-project-card {
+  margin-top: var(--space-4);
+  max-width: 760px;
+}
+
+.c--personal-project-focus-title {
+  font-size: 1rem;
+}
+
 .c--timeline {
   border: 1px solid var(--border);
   border-radius: var(--radius-md);
@@ -803,6 +887,7 @@ html.theme-light .c--cta-stat-num {
   flex-direction: column;
   gap: 6px;
   padding-bottom: 28px;
+  min-width: 0;
 }
 
 .c--timeline-entry:last-child .c--timeline-body {
@@ -829,6 +914,7 @@ html.theme-light .c--cta-stat-num {
   font-weight: 700;
   line-height: 1.3;
   margin: 0;
+  overflow-wrap: anywhere;
 }
 
 .c--timeline-detail {
@@ -1194,9 +1280,33 @@ html.theme-light .c--cta-stat-num {
   }
 
   .c--nav {
-    gap: var(--space-2);
-    overflow-x: auto;
-    max-width: 65vw;
+    gap: 10px;
+    min-width: 0;
+  }
+
+  .c--home-hero .c--hero-split {
+    padding-top: var(--space-4);
+  }
+
+  .c--capability-strip {
+    grid-template-columns: 1fr;
+  }
+
+  .c--capability + .c--capability {
+    border-left: 0;
+    border-top: 1px solid var(--border);
+  }
+
+  .c--nav-link {
+    font-size: 0.82rem;
+  }
+
+  .c--brand {
+    font-size: 1.1rem;
+  }
+
+  .c--header-actions {
+    gap: 6px;
   }
 
   .c--grid-3 {
@@ -1210,6 +1320,11 @@ html.theme-light .c--cta-stat-num {
   .c--hero-portrait-card {
     width: 240px;
     height: 240px;
+  }
+
+  .c--capability {
+    min-height: 76px;
+    padding: 16px 20px;
   }
 
   .c--hero-avail-badge {
@@ -1251,6 +1366,34 @@ html.theme-light .c--cta-stat-num {
   transition: all var(--duration-base) var(--ease-standard);
   overflow: hidden;
   position: relative;
+}
+
+.c--language-toggle {
+  min-height: 40px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-pill);
+  padding: 0 10px;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  color: var(--text-muted);
+  background: var(--bg-elevated);
+  font: inherit;
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  cursor: pointer;
+  transition: border-color var(--duration-base) var(--ease-standard), color var(--duration-base) var(--ease-standard);
+}
+
+.c--language-toggle:hover,
+.c--language-toggle:focus-visible {
+  color: var(--brand);
+  border-color: var(--brand);
+}
+
+.c--language-toggle .is-active {
+  color: var(--brand);
 }
 
 .c--theme-toggle:hover {

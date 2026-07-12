@@ -1,11 +1,16 @@
 import { NextResponse } from "next/server";
-import { parseContactSubmissionDto } from "@/lib/admin/contact-dto";
 
 type Payload = {
   name?: string;
   email?: string;
   detail?: string;
   website?: string;
+};
+
+type ContactSubmission = {
+  name: string;
+  email: string;
+  detail: string;
 };
 
 type RateEntry = {
@@ -22,6 +27,18 @@ const contactFromEmail = process.env.CONTACT_FROM_EMAIL;
 
 function isValidEmail(email: string) {
   return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+}
+
+function parseContactSubmission(body: Payload): ContactSubmission {
+  const name = body.name?.trim();
+  const email = body.email?.trim();
+  const detail = body.detail?.trim();
+
+  if (!name || !email || !detail) {
+    throw new Error("Missing required fields");
+  }
+
+  return { name, email, detail };
 }
 
 function getClientIp(request: Request) {
@@ -103,7 +120,7 @@ export async function POST(request: Request) {
   let submission;
 
   try {
-    submission = parseContactSubmissionDto(body);
+    submission = parseContactSubmission(body);
   } catch {
     return NextResponse.json({ error: "Please fill out all required fields." }, { status: 400 });
   }

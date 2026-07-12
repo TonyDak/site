@@ -1,12 +1,15 @@
 "use client";
 
 import { FormEvent, useState } from "react";
+import { useLanguage } from "@/components/language/LanguageProvider";
 
 type Status = "idle" | "loading" | "success" | "error";
 
 export function ContactForm() {
     const [status, setStatus] = useState<Status>("idle");
     const [message, setMessage] = useState("");
+    const { content } = useLanguage();
+    const copy = content.contactForm;
 
     async function handleSubmit(event: FormEvent<HTMLFormElement>) {
         event.preventDefault();
@@ -15,49 +18,48 @@ export function ContactForm() {
         setStatus("loading");
 
         try {
-            const response = await fetch("/api/contact", {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({
-                    name: formData.get("name"),
-                    email: formData.get("email"),
-                    detail: formData.get("detail"),
-                    website: formData.get("website"),
-                }),
+            const name = String(formData.get("name") ?? "").trim();
+            const email = String(formData.get("email") ?? "").trim();
+            const detail = String(formData.get("detail") ?? "").trim();
+            const query = new URLSearchParams({
+                view: "cm",
+                fs: "1",
+                to: "duckg2083@gmail.com",
+                su: `Portfolio inquiry from ${name}`,
+                body: `Name: ${name}\nEmail: ${email}\n\nProject details:\n${detail}`,
             });
+            const gmailUrl = `https://mail.google.com/mail/?${query.toString()}`;
+            const openedWindow = window.open(gmailUrl, "_blank");
 
-            if (response.ok) {
-                setStatus("success");
-                setMessage("Message sent. I will reply shortly.");
-                form.reset();
-                return;
+            if (openedWindow) {
+                openedWindow.opener = null;
+            } else {
+                window.location.assign(gmailUrl);
             }
 
-            const payload = (await response.json().catch(() => null)) as
-                | { error?: string }
-                | null;
-            setStatus("error");
-            setMessage(payload?.error ?? "Could not send right now. Please try again.");
+            setStatus("success");
+            setMessage(copy.successMessage);
+            form.reset();
         } catch {
             setStatus("error");
-            setMessage("Network issue. Please try again in a moment.");
+            setMessage(copy.networkError);
         }
     }
 
     return (
         <form className="c--contact-form" onSubmit={handleSubmit}>
             <label className="c--field">
-                Name
+                {copy.nameLabel}
                 <input name="name" required />
             </label>
 
             <label className="c--field">
-                Email
+                {copy.emailLabel}
                 <input name="email" type="email" required />
             </label>
 
             <label className="c--field">
-                Project details
+                {copy.detailsLabel}
                 <textarea name="detail" rows={6} required />
             </label>
 
@@ -70,7 +72,7 @@ export function ContactForm() {
             />
 
             <button className="c--btn c--btn-primary" type="submit" disabled={status === "loading"}>
-                {status === "loading" ? "Sending..." : "Send message"}
+                {status === "loading" ? copy.sendingLabel : copy.submitLabel}
             </button>
 
             <p className="u--muted c--status-msg">{status !== "idle" ? message : ""}</p>

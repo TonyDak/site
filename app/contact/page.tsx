@@ -1,16 +1,13 @@
-import type { Metadata } from "next";
+"use client";
+
 import Image from "next/image";
+import { useLanguage } from "@/components/language/LanguageProvider";
 import { Reveal } from "@/components/motion/Reveal";
 import { ContactForm } from "./ContactForm";
-import { getSiteConfig } from "@/lib/site";
 
-export const metadata: Metadata = {
-    title: "Contact | Tony Portfolio",
-    description: "Get in touch about product design, frontend implementation, and launch support.",
-};
-
-export default async function ContactPage() {
-    const siteConfig = await getSiteConfig();
+export default function ContactPage() {
+    const { content } = useLanguage();
+    const siteConfig = content.site;
     const pageCopy = siteConfig.pages.contact;
 
     return (
@@ -24,6 +21,14 @@ export default async function ContactPage() {
                         <p className="c--hero-subtitle">{pageCopy.subtitle}</p>
 
                         <div className="c--contact-links">
+                            <a href={`tel:${siteConfig.phone}`} className="c--contact-link-item">
+                                <span className="c--contact-link-icon">
+                                    <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                                        <path d="M7.3 3.8 9.8 7l-1.7 2.3c1.1 2.4 3.1 4.4 5.5 5.5l2.3-1.7 3.2 2.5-1.2 3.3c-.2.6-.8 1-1.5.9C9.2 19 5 14.8 4.1 7.6c-.1-.7.3-1.3.9-1.5l2.3-.8Z" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+                                    </svg>
+                                </span>
+                                <span className="c--contact-link-text">{siteConfig.phone}</span>
+                            </a>
                             <a href={`mailto:${siteConfig.email}`} className="c--contact-link-item">
                                 {/* Email icon */}
                                 <span className="c--contact-link-icon">
@@ -43,7 +48,7 @@ export default async function ContactPage() {
                                 </span>
                                 <span className="c--contact-link-text">{siteConfig.social.github}</span>
                             </a>
-                            <a href={siteConfig.social.linkedin} target="_blank" rel="noopener noreferrer" className="c--contact-link-item">
+                            <a href={siteConfig.social.linkedin} target="_blank" rel="noopener noreferrer" className="c--contact-link-item" hidden={!siteConfig.social.linkedin}>
                                 {/* LinkedIn icon */}
                                 <span className="c--contact-link-icon">
                                     <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
@@ -74,7 +79,7 @@ export default async function ContactPage() {
                             <div className="c--contact-avatar-info">
                                 <p className="c--contact-avatar-name">{siteConfig.ownerName}</p>
                                 <p className="c--contact-avatar-role">{siteConfig.role}</p>
-                                <p className="c--contact-avatar-loc">
+                                <p className="c--contact-avatar-loc" hidden={!siteConfig.location}>
                                     <svg viewBox="0 0 24 24" fill="none" aria-hidden="true" style={{ width: 14, height: 14 }}>
                                         <path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7z" stroke="currentColor" strokeWidth="1.5"/>
                                         <circle cx="12" cy="9" r="2.5" stroke="currentColor" strokeWidth="1.5"/>

@@ -1,12 +1,8 @@
-import { getContentRepository } from "@/lib/admin/content-repository";
-import type { SiteConfig } from "@/lib/admin/content-models";
+import { siteConfig } from "@/lib/content/data";
+import type { SiteConfig } from "@/lib/content/types";
 
-export type { SiteConfig } from "@/lib/admin/content-models";
+export type { SiteConfig } from "@/lib/content/types";
 
-export async function getSiteConfig() {
-  return getContentRepository().getSiteConfig();
-}
-
-export async function saveSiteConfig(value: SiteConfig) {
-  await getContentRepository().saveSiteConfig(value);
+export function getSiteConfig(): SiteConfig {
+  return siteConfig;
 }
