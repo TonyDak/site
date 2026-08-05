@@ -29,6 +29,7 @@ export type SitePages = {
     projectsIntro: string;
     personalProjectHeading: string;
     personalProjectRoleLabel: string;
+    personalProjectStackLabel: string;
     personalProjectFocusLabel: string;
   };
   contact: {
@@ -67,6 +68,7 @@ export type PersonalProject = {
   title: string;
   role: string;
   description: string;
+  stack: string[];
   focus: string[];
 };
 

@@ -109,6 +109,12 @@ export default function AboutPage() {
             <ArrowIcon />
           </a>
           <p className="c--project-description">{about.personalProject.description}</p>
+          <div className="c--project-stack">
+            <p className="c--editorial-label">{pageCopy.personalProjectStackLabel}</p>
+            <ul aria-label={pageCopy.personalProjectStackLabel}>
+              {about.personalProject.stack.map((technology) => <li key={technology}>{technology}</li>)}
+            </ul>
+          </div>
           <p className="c--editorial-label c--focus-label">{pageCopy.personalProjectFocusLabel}</p>
           <ol className="c--focus-list">
             {about.personalProject.focus.map((item, index) => <li key={item}><span>0{index + 1}</span><p>{item}</p></li>)}

@@ -18,7 +18,7 @@ export const portfolioContent = {
         home: {
           eyebrow: "Web & Mobile Developer",
           heroTitle: "Building reliable web and mobile products end to end.",
-          heroSubtitle: "Web & Mobile Developer with 1+ year of experience building enterprise applications with Next.js, React Native, NestJS, ASP.NET Core, PostgreSQL, MySQL, and MongoDB.",
+          heroSubtitle: "Web & Mobile Developer with 1+ year of experience building enterprise applications with Next.js, React Native, NestJS, and ASP.NET Core, with a growing focus on backend engineering using Java and Spring Boot.",
           ctaHeading: "From architecture to production",
           ctaText: "I build reliable web and mobile products with clean architecture, thoughtful API design, and maintainable delivery practices.",
           primaryCtaLabel: "About my work",
@@ -38,6 +38,7 @@ export const portfolioContent = {
           projectsIntro: "Some product work is confidential under NDA. My contribution spans enterprise web and mobile delivery, backend API integration, production support, and performance improvements.",
           personalProjectHeading: "Personal project",
           personalProjectRoleLabel: "Role",
+          personalProjectStackLabel: "Tech stack",
           personalProjectFocusLabel: "Learning focus",
         },
         contact: {
@@ -73,8 +74,9 @@ export const portfolioContent = {
       personalProject: {
         title: "Microservice Social Platform",
         role: "Backend Developer · Learning Project",
-        description: "A personal project built to understand microservice architecture and distributed systems.",
-        focus: ["API Gateway and service discovery", "JWT authentication and Keycloak", "Event-driven communication with Kafka", "Distributed cache with Redis", "Docker deployment and service-to-service communication"],
+        description: "A Spring Boot microservices project built to explore distributed systems and modern backend architecture.",
+        stack: ["Spring Boot", "Spring Cloud", "Kafka", "Redis", "Keycloak", "Docker"],
+        focus: ["API Gateway and service discovery with Spring Cloud", "JWT authentication and Keycloak", "Event-driven communication with Kafka", "Distributed cache with Redis", "Docker deployment and service-to-service communication"],
       },
     },
     navigation: { home: "Home", about: "About", contact: "Contact", languageLabel: "Switch to Vietnamese", cvLabel: "Download CV" },
@@ -89,7 +91,7 @@ export const portfolioContent = {
         home: {
           eyebrow: "Lập trình viên Web & Mobile",
           heroTitle: "Xây dựng sản phẩm web và mobile đáng tin cậy từ đầu đến cuối.",
-          heroSubtitle: "Lập trình viên Web & Mobile với hơn một năm kinh nghiệm xây dựng ứng dụng doanh nghiệp cùng Next.js, React Native, NestJS, ASP.NET Core, PostgreSQL, MySQL và MongoDB.",
+          heroSubtitle: "Lập trình viên Web & Mobile với hơn một năm kinh nghiệm xây dựng ứng dụng doanh nghiệp bằng Next.js, React Native, NestJS và ASP.NET Core; đồng thời định hướng chuyên sâu backend với Java và Spring Boot.",
           ctaHeading: "Từ kiến trúc đến vận hành thực tế",
           ctaText: "Tôi xây dựng sản phẩm web và mobile đáng tin cậy với kiến trúc sạch, thiết kế API chỉn chu và quy trình phát triển dễ bảo trì.",
           primaryCtaLabel: "Công việc của tôi",
@@ -109,6 +111,7 @@ export const portfolioContent = {
           projectsIntro: "Một số sản phẩm thuộc phạm vi bảo mật theo NDA. Tôi đóng góp vào phát triển web và mobile doanh nghiệp, tích hợp backend API, hỗ trợ production và cải thiện hiệu năng.",
           personalProjectHeading: "Dự án cá nhân",
           personalProjectRoleLabel: "Vai trò",
+          personalProjectStackLabel: "Công nghệ sử dụng",
           personalProjectFocusLabel: "Nội dung tìm hiểu",
         },
         contact: {
@@ -144,8 +147,9 @@ export const portfolioContent = {
       personalProject: {
         title: "Nền tảng Mạng xã hội Microservice",
         role: "Backend Developer · Dự án học tập",
-        description: "Dự án cá nhân nhằm tìm hiểu kiến trúc microservice và hệ thống phân tán.",
-        focus: ["API Gateway và service discovery", "JWT authentication và Keycloak", "Giao tiếp event-driven với Kafka", "Distributed cache với Redis", "Triển khai Docker và giao tiếp giữa các service"],
+        description: "Dự án microservices với Spring Boot nhằm tìm hiểu hệ thống phân tán và kiến trúc backend hiện đại.",
+        stack: ["Spring Boot", "Spring Cloud", "Kafka", "Redis", "Keycloak", "Docker"],
+        focus: ["API Gateway và service discovery với Spring Cloud", "JWT authentication và Keycloak", "Giao tiếp event-driven với Kafka", "Distributed cache với Redis", "Triển khai Docker và giao tiếp giữa các service"],
       },
     },
     navigation: { home: "Trang chủ", about: "Giới thiệu", contact: "Liên hệ", languageLabel: "Chuyển sang tiếng Anh", cvLabel: "Tải CV" },
