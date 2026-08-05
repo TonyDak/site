@@ -1285,8 +1285,15 @@ html.theme-light .c--cta-stat-num {
   }
 
   .c--nav {
-    gap: 10px;
-    min-width: 0;
+    display: none !important;
+  }
+
+  .c--desktop-only {
+    display: none !important;
+  }
+
+  .c--mobile-only {
+    display: inline-flex !important;
   }
 
   .c--home-hero .c--hero-split {
@@ -1419,4 +1426,142 @@ html.theme-light .c--cta-stat-num {
 
 .c--theme-toggle:active .c--theme-toggle-icon {
   transform: scale(0.9);
+}
+
+/* Global helpers for responsive visibility */
+.c--mobile-only {
+  display: none !important;
+}
+
+/* Hamburger & Mobile Menu Styles */
+.c--menu-toggle {
+  display: none;
+  background: none;
+  border: none;
+  padding: 0;
+  cursor: pointer;
+  width: 40px;
+  height: 40px;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  border: 1px solid var(--border);
+  background: var(--bg-elevated);
+  color: var(--text);
+  transition: all var(--duration-base) var(--ease-standard);
+  margin-left: 4px;
+}
+
+.c--menu-toggle:hover,
+.c--menu-toggle:focus-visible {
+  border-color: var(--brand);
+  color: var(--brand);
+}
+
+@media (max-width: 720px) {
+  .c--menu-toggle {
+    display: flex;
+  }
+}
+
+.c--hamburger {
+  width: 18px;
+  height: 12px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  position: relative;
+}
+
+.c--hamburger span {
+  display: block;
+  width: 100%;
+  height: 2px;
+  background-color: currentColor;
+  border-radius: 2px;
+  transition: transform var(--duration-base) var(--ease-standard),
+              opacity var(--duration-base) var(--ease-standard);
+}
+
+.c--hamburger.is-active span:nth-child(1) {
+  transform: translateY(5px) rotate(45deg);
+}
+
+.c--hamburger.is-active span:nth-child(2) {
+  opacity: 0;
+}
+
+.c--hamburger.is-active span:nth-child(3) {
+  transform: translateY(-5px) rotate(-45deg);
+}
+
+.c--mobile-menu {
+  position: fixed;
+  top: 72px;
+  left: 0;
+  width: 100%;
+  height: calc(100vh - 72px);
+  background: color-mix(in srgb, var(--bg) 95%, transparent);
+  backdrop-filter: blur(16px);
+  z-index: 99;
+  display: flex;
+  flex-direction: column;
+  padding: var(--space-5) var(--space-4);
+  transform: translateY(-100%);
+  opacity: 0;
+  pointer-events: none;
+  transition: transform var(--duration-emphasis) var(--ease-standard),
+              opacity var(--duration-emphasis) var(--ease-standard);
+  border-bottom: 1px solid var(--border);
+}
+
+@media (max-width: 720px) {
+  .c--mobile-menu {
+    top: 62px;
+    height: calc(100vh - 62px);
+  }
+}
+
+.c--mobile-menu.is-open {
+  transform: translateY(0);
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.c--mobile-nav {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+}
+
+.c--mobile-nav-link {
+  font-family: var(--font-heading), "Segoe UI", sans-serif;
+  font-size: 1.75rem;
+  font-weight: 700;
+  color: var(--text);
+  text-decoration: none;
+  transition: color var(--duration-base) var(--ease-standard), transform var(--duration-base) var(--ease-standard);
+}
+
+.c--mobile-nav-link:hover,
+.c--mobile-nav-link:focus-visible {
+  color: var(--brand);
+  transform: scale(1.05);
+}
+
+/* Ensure mobile CV download displays properly inside the drawer */
+.c--mobile-menu .c--cv-download {
+  display: inline-flex !important;
+  width: auto !important;
+  min-height: 48px;
+  padding: 0 var(--space-5);
+  margin-top: var(--space-4);
+  font-size: 0.95rem;
+}
+
+.c--mobile-menu .c--cv-download span {
+  display: inline !important;
 }
