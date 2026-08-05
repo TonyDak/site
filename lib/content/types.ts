@@ -72,7 +72,10 @@ export type PersonalProject = {
 
 export type AboutContent = {
   timeline: AboutTimelineItem[];
-  skills: string[];
+  skillGroups: Array<{
+    label: string;
+    items: string[];
+  }>;
   personalProject: PersonalProject;
 };
 

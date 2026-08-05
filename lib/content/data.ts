@@ -61,7 +61,15 @@ export const portfolioContent = {
         { label: "Current focus", title: "Production web, mobile, and backend delivery", detail: "Building with Next.js, React Native, NestJS, and ASP.NET Core while designing databases, integrating APIs, and resolving production issues." },
         { label: "Continuous learning", title: "Distributed systems and backend architecture", detail: "Exploring microservices, event-driven architecture, Docker, Kafka, Redis, and scalable service-to-service communication through personal projects." },
       ],
-      skills: ["Next.js", "React Native", "TypeScript", "NestJS", "ASP.NET Core", "Spring Boot", "PostgreSQL", "MongoDB", "MySQL", "Docker", "Git"],
+      skillGroups: [
+        { label: "Languages", items: ["TypeScript", "JavaScript", "C#", "Java", "C++", "SQL"] },
+        { label: "Frontend", items: ["Next.js", "React.js", "React Native", "Expo", "HTML5", "CSS3", "Tailwind CSS"] },
+        { label: "Backend", items: ["NestJS", "ASP.NET Core Web API", "Spring Boot", "RESTful API", "WebSocket", "JWT Authentication"] },
+        { label: "Databases", items: ["PostgreSQL", "MongoDB", "MySQL"] },
+        { label: "Messaging & Caching", items: ["Apache Kafka", "Redis"] },
+        { label: "Tools & DevOps", items: ["Docker", "Docker Compose", "Git", "Postman", "Swagger", "Firebase", "Linux"] },
+        { label: "Architecture", items: ["Clean Architecture", "Multi-tenant Systems", "Event-driven Architecture", "Microservices (learning)"] },
+      ],
       personalProject: {
         title: "Microservice Social Platform",
         role: "Backend Developer · Learning Project",
@@ -124,7 +132,15 @@ export const portfolioContent = {
         { label: "Trọng tâm hiện tại", title: "Phát triển web, mobile và backend cho production", detail: "Xây dựng với Next.js, React Native, NestJS và ASP.NET Core; đồng thời thiết kế cơ sở dữ liệu, tích hợp API và xử lý vấn đề production." },
         { label: "Học tập liên tục", title: "Hệ thống phân tán và kiến trúc backend", detail: "Tìm hiểu microservices, event-driven architecture, Docker, Kafka, Redis và giao tiếp giữa các dịch vụ qua dự án cá nhân." },
       ],
-      skills: ["Next.js", "React Native", "TypeScript", "NestJS", "ASP.NET Core", "Spring Boot", "PostgreSQL", "MongoDB", "MySQL", "Docker", "Git"],
+      skillGroups: [
+        { label: "Ngôn ngữ", items: ["TypeScript", "JavaScript", "C#", "Java", "C++", "SQL"] },
+        { label: "Frontend", items: ["Next.js", "React.js", "React Native", "Expo", "HTML5", "CSS3", "Tailwind CSS"] },
+        { label: "Backend", items: ["NestJS", "ASP.NET Core Web API", "Spring Boot", "RESTful API", "WebSocket", "JWT Authentication"] },
+        { label: "Cơ sở dữ liệu", items: ["PostgreSQL", "MongoDB", "MySQL"] },
+        { label: "Messaging & Caching", items: ["Apache Kafka", "Redis"] },
+        { label: "Công cụ & DevOps", items: ["Docker", "Docker Compose", "Git", "Postman", "Swagger", "Firebase", "Linux"] },
+        { label: "Kiến trúc", items: ["Clean Architecture", "Multi-tenant Systems", "Event-driven Architecture", "Microservices (đang học)"] },
+      ],
       personalProject: {
         title: "Nền tảng Mạng xã hội Microservice",
         role: "Backend Developer · Dự án học tập",

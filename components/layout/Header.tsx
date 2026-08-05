@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import { usePathname } from "next/navigation";
 import { LanguageToggle } from "@/components/language/LanguageToggle";
 import { useLanguage } from "@/components/language/LanguageProvider";
 import { TransitionLink } from "@/components/motion/TransitionLink";
@@ -9,6 +10,7 @@ import { ThemeToggle } from "@/components/theme/ThemeToggle";
 export function Header() {
     const [isOpen, setIsOpen] = useState(false);
     const { content } = useLanguage();
+    const pathname = usePathname();
     const { site, navigation } = content;
     const navItems = [
         { href: "/", label: navigation.home },
@@ -45,7 +47,7 @@ export function Header() {
                 {/* Desktop Nav */}
                 <nav className="c--nav" aria-label="Primary">
                     {navItems.map((item) => (
-                        <TransitionLink key={item.href} href={item.href} className="c--nav-link">
+                        <TransitionLink key={item.href} href={item.href} className={`c--nav-link ${pathname === item.href ? "is-active" : ""}`} aria-current={pathname === item.href ? "page" : undefined}>
                             {item.label}
                         </TransitionLink>
                     ))}

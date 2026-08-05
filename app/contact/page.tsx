@@ -5,92 +5,55 @@ import { useLanguage } from "@/components/language/LanguageProvider";
 import { Reveal } from "@/components/motion/Reveal";
 import { ContactForm } from "./ContactForm";
 
+function ArrowIcon() {
+  return <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M5 12h14M14 7l5 5-5 5" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" /></svg>;
+}
+
+function ContactIcon({ type }: { type: "phone" | "email" | "github" | "linkedin" }) {
+  if (type === "phone") return <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M7.3 3.8 9.8 7l-1.7 2.3c1.1 2.4 3.1 4.4 5.5 5.5l2.3-1.7 3.2 2.5-1.2 3.3c-.2.6-.8 1-1.5.9C9.2 19 5 14.8 4.1 7.6c-.1-.7.3-1.3.9-1.5l2.3-.8Z" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" /></svg>;
+  if (type === "email") return <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><rect x="2" y="4" width="20" height="16" rx="2" stroke="currentColor" strokeWidth="1.5"/><path d="M2 7l10 7 10-7" stroke="currentColor" strokeWidth="1.5" /></svg>;
+  if (type === "linkedin") return <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M20.45 20.45h-3.56v-5.57c0-1.33-.02-3.03-1.85-3.03-1.85 0-2.14 1.44-2.14 2.94v5.66H9.35V9h3.41v1.56h.05c.48-.9 1.64-1.85 3.37-1.85 3.6 0 4.27 2.37 4.27 5.45v6.29ZM5.34 7.43a2.06 2.06 0 1 1 0-4.13 2.06 2.06 0 0 1 0 4.13ZM7.12 20.45H3.56V9h3.56v11.45Z" /></svg>;
+  return <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 2a10 10 0 0 0-3.16 19.49c.5.09.68-.22.68-.48v-1.87c-2.78.6-3.37-1.18-3.37-1.18-.45-1.16-1.11-1.47-1.11-1.47-.91-.62.07-.61.07-.61 1 .07 1.53 1.03 1.53 1.03.89 1.53 2.34 1.09 2.91.83.09-.65.35-1.09.64-1.34-2.22-.25-4.56-1.11-4.56-4.95 0-1.09.39-1.99 1.03-2.69-.1-.25-.45-1.27.1-2.65 0 0 .84-.27 2.75 1.03A9.55 9.55 0 0 1 12 6.84a9.6 9.6 0 0 1 2.5.34c1.91-1.3 2.75-1.03 2.75-1.03.55 1.38.2 2.4.1 2.65.64.7 1.03 1.6 1.03 2.69 0 3.85-2.34 4.7-4.57 4.95.36.31.68.92.68 1.86v2.74c0 .27.18.58.69.48A10 10 0 0 0 12 2Z" /></svg>;
+}
+
 export default function ContactPage() {
-    const { content } = useLanguage();
-    const siteConfig = content.site;
-    const pageCopy = siteConfig.pages.contact;
+  const { content } = useLanguage();
+  const site = content.site;
+  const pageCopy = site.pages.contact;
+  const links = [
+    { type: "phone" as const, href: `tel:${site.phone}`, label: site.phone },
+    { type: "email" as const, href: `mailto:${site.email}`, label: site.email },
+    { type: "github" as const, href: site.social.github, label: "GitHub" },
+    ...(site.social.linkedin ? [{ type: "linkedin" as const, href: site.social.linkedin, label: "LinkedIn" }] : []),
+  ];
 
-    return (
-        <section className="c--section">
-            <div className="u--container">
-                <div className="c--contact-split">
-                    {/* ── Left: header + form ── */}
-                    <Reveal className="js--reveal-it c--contact-left">
-                        <p className="c--eyebrow">{pageCopy.eyebrow}</p>
-                        <h1>{pageCopy.title}</h1>
-                        <p className="c--hero-subtitle">{pageCopy.subtitle}</p>
-
-                        <div className="c--contact-links">
-                            <a href={`tel:${siteConfig.phone}`} className="c--contact-link-item">
-                                <span className="c--contact-link-icon">
-                                    <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
-                                        <path d="M7.3 3.8 9.8 7l-1.7 2.3c1.1 2.4 3.1 4.4 5.5 5.5l2.3-1.7 3.2 2.5-1.2 3.3c-.2.6-.8 1-1.5.9C9.2 19 5 14.8 4.1 7.6c-.1-.7.3-1.3.9-1.5l2.3-.8Z" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
-                                    </svg>
-                                </span>
-                                <span className="c--contact-link-text">{siteConfig.phone}</span>
-                            </a>
-                            <a href={`mailto:${siteConfig.email}`} className="c--contact-link-item">
-                                {/* Email icon */}
-                                <span className="c--contact-link-icon">
-                                    <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
-                                        <rect x="2" y="4" width="20" height="16" rx="3" stroke="currentColor" strokeWidth="1.5"/>
-                                        <path d="M2 7l10 7 10-7" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
-                                    </svg>
-                                </span>
-                                <span className="c--contact-link-text">{siteConfig.email}</span>
-                            </a>
-                            <a href={siteConfig.social.github} target="_blank" rel="noopener noreferrer" className="c--contact-link-item">
-                                {/* GitHub icon */}
-                                <span className="c--contact-link-icon">
-                                    <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
-                                        <path d="M12 2C6.477 2 2 6.484 2 12.017c0 4.425 2.865 8.18 6.839 9.504.5.092.682-.217.682-.483 0-.237-.008-.868-.013-1.703-2.782.605-3.369-1.343-3.369-1.343-.454-1.158-1.11-1.466-1.11-1.466-.908-.62.069-.608.069-.608 1.003.07 1.531 1.032 1.531 1.032.892 1.53 2.341 1.088 2.91.832.092-.647.35-1.088.636-1.338-2.22-.253-4.555-1.113-4.555-4.951 0-1.093.39-1.988 1.029-2.688-.103-.253-.446-1.272.098-2.65 0 0 .84-.27 2.75 1.026A9.564 9.564 0 0 1 12 6.844a9.59 9.59 0 0 1 2.504.337c1.909-1.296 2.747-1.027 2.747-1.027.546 1.379.202 2.398.1 2.651.64.7 1.028 1.595 1.028 2.688 0 3.848-2.339 4.695-4.566 4.943.359.309.678.92.678 1.855 0 1.338-.012 2.419-.012 2.747 0 .268.18.58.688.482A10.02 10.02 0 0 0 22 12.017C22 6.484 17.522 2 12 2z"/>
-                                    </svg>
-                                </span>
-                                <span className="c--contact-link-text">{siteConfig.social.github}</span>
-                            </a>
-                            <a href={siteConfig.social.linkedin} target="_blank" rel="noopener noreferrer" className="c--contact-link-item" hidden={!siteConfig.social.linkedin}>
-                                {/* LinkedIn icon */}
-                                <span className="c--contact-link-icon">
-                                    <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
-                                        <path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433a2.062 2.062 0 0 1-2.063-2.065 2.064 2.064 0 1 1 2.063 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z"/>
-                                    </svg>
-                                </span>
-                                <span className="c--contact-link-text">{siteConfig.social.linkedin}</span>
-                            </a>
-                        </div>
-
-                        <ContactForm />
-                    </Reveal>
-
-                    {/* ── Right: avatar ── */}
-                    <Reveal className="js--reveal-it c--contact-avatar-col" delayMs={120}>
-                        <div className="c--contact-avatar-card">
-                            <div className="c--contact-avatar-glow" aria-hidden="true" />
-                            <div className="c--contact-avatar-img-wrap">
-                                <Image
-                                    src="/avatar.jpg"
-                                    alt={`${siteConfig.ownerName} — ${siteConfig.role}`}
-                                    width={400}
-                                    height={500}
-                                    className="c--contact-avatar-img"
-                                    priority
-                                />
-                            </div>
-                            <div className="c--contact-avatar-info">
-                                <p className="c--contact-avatar-name">{siteConfig.ownerName}</p>
-                                <p className="c--contact-avatar-role">{siteConfig.role}</p>
-                                <p className="c--contact-avatar-loc" hidden={!siteConfig.location}>
-                                    <svg viewBox="0 0 24 24" fill="none" aria-hidden="true" style={{ width: 14, height: 14 }}>
-                                        <path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7z" stroke="currentColor" strokeWidth="1.5"/>
-                                        <circle cx="12" cy="9" r="2.5" stroke="currentColor" strokeWidth="1.5"/>
-                                    </svg>
-                                    {siteConfig.location}
-                                </p>
-                            </div>
-                        </div>
-                    </Reveal>
-                </div>
+  return (
+    <section className="c--editorial-page c--contact-page">
+      <div className="u--container c--contact-editorial-grid">
+        <Reveal className="c--contact-editorial-left">
+          <p className="c--editorial-label">{pageCopy.eyebrow}</p>
+          <h1>{pageCopy.title}</h1>
+          <p className="c--editorial-lead">{pageCopy.subtitle}</p>
+          <div className="c--contact-editorial-links">
+            {links.map((link) => (
+              <a href={link.href} key={link.type} target={link.type === "github" || link.type === "linkedin" ? "_blank" : undefined} rel={link.type === "github" || link.type === "linkedin" ? "noreferrer" : undefined}>
+                <span className="c--contact-row-icon"><ContactIcon type={link.type} /></span>
+                <span>{link.label}</span>
+                <span className="c--contact-row-arrow"><ArrowIcon /></span>
+              </a>
+            ))}
+          </div>
+          <div className="c--contact-identity">
+            <div className="c--contact-identity-image"><Image src="/avatar-lowpoly-v2.jpg" alt={`${site.ownerName} — ${site.role}`} width={360} height={360} priority /></div>
+            <div>
+              <h2>{site.ownerName}</h2>
+              <p>{site.role}</p>
+              <span>{site.location}</span>
             </div>
-        </section>
-    );
+          </div>
+        </Reveal>
+        <Reveal className="c--contact-editorial-form"><ContactForm /></Reveal>
+      </div>
+    </section>
+  );
 }
