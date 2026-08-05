@@ -25,7 +25,6 @@ export const metadata: Metadata = {
     template: "%s | Duc Nguyen",
   },
   description: "Web & Mobile Developer portfolio for Nguyễn Hữu Đức.",
-  icons: { icon: "/avatar-lowpoly-v2.jpg" },
   openGraph: {
     title: "Portfolio | Duc Nguyen",
     description: "Web & Mobile Developer portfolio for Nguyễn Hữu Đức.",
