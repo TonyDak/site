@@ -1,8 +1,8 @@
 "use client";
 
-import Image from "next/image";
 import { useLanguage } from "@/components/language/LanguageProvider";
-import { GravityField } from "@/components/motion/GravityField";
+import { ThreeDepthField } from "@/components/home/ThreeDepthField";
+import { HeroDepthCard } from "@/components/home/HeroDepthCard";
 import { Reveal } from "@/components/motion/Reveal";
 import { TransitionLink } from "@/components/motion/TransitionLink";
 
@@ -31,11 +31,12 @@ export default function Home() {
 
   return (
     <>
-      <GravityField />
+      <ThreeDepthField />
       <section className="c--hero c--home-hero">
         <div className="u--container">
           <div className="c--hero-split">
             <Reveal className="c--hero-content">
+              <div className="c--eyebrow">{pageCopy.eyebrow}</div>
               <h1 aria-label={pageCopy.heroTitle}>
                 {heroTitleLines.map((line) => <span className="c--hero-title-line" key={line}>{line}</span>)}
               </h1>
@@ -50,10 +51,7 @@ export default function Home() {
             </Reveal>
 
             <Reveal className="c--hero-portrait-wrap" delayMs={80}>
-              <div className="c--hero-portrait-card">
-                <Image src="/avatar-lowpoly-v2.jpg" alt={`${site.ownerName} — ${site.role}`} width={420} height={420} className="c--hero-portrait-img" priority />
-                <div className="c--portrait-index" aria-hidden="true"><span />01</div>
-              </div>
+              <HeroDepthCard ownerName={site.ownerName} role={site.role} />
             </Reveal>
           </div>
 
