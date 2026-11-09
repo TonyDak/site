@@ -1,7 +1,7 @@
 import type { Locale, PortfolioContent } from "./types";
 
 const sharedIdentity = {
-  name: "duc.dev",
+  name: "ducnguyen.dev",
   ownerName: "Nguyễn Hữu Đức",
   email: "duckg2083@gmail.com",
   phone: "0946945409",

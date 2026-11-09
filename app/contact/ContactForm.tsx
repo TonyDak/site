@@ -1,81 +1,127 @@
 "use client";
 
-import { FormEvent, useState } from "react";
+import { useState, type FormEvent } from "react";
 import { useLanguage } from "@/components/language/LanguageProvider";
+import { Icon } from "@/components/ide/icons";
 
 type Status = "idle" | "loading" | "success" | "error";
 
 export function ContactForm() {
-    const [status, setStatus] = useState<Status>("idle");
-    const [message, setMessage] = useState("");
-    const { content } = useLanguage();
-    const copy = content.contactForm;
+  const { content } = useLanguage();
+  const copy = content.contactForm;
+  const [status, setStatus] = useState<Status>("idle");
+  const [message, setMessage] = useState("");
 
-    async function handleSubmit(event: FormEvent<HTMLFormElement>) {
-        event.preventDefault();
-        const form = event.currentTarget;
-        const formData = new FormData(form);
-        setStatus("loading");
+  async function handleSubmit(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+    const form = event.currentTarget;
+    const formData = new FormData(form);
+    setStatus("loading");
+    setMessage("");
 
-        try {
-            const name = String(formData.get("name") ?? "").trim();
-            const email = String(formData.get("email") ?? "").trim();
-            const detail = String(formData.get("detail") ?? "").trim();
-            const query = new URLSearchParams({
-                view: "cm",
-                fs: "1",
-                to: "duckg2083@gmail.com",
-                su: `Portfolio inquiry from ${name}`,
-                body: `Name: ${name}\nEmail: ${email}\n\nProject details:\n${detail}`,
-            });
-            const gmailUrl = `https://mail.google.com/mail/?${query.toString()}`;
-            const openedWindow = window.open(gmailUrl, "_blank");
+    const name = String(formData.get("name") ?? "").trim();
+    const email = String(formData.get("email") ?? "").trim();
+    const detail = String(formData.get("detail") ?? "").trim();
 
-            if (openedWindow) {
-                openedWindow.opener = null;
-            } else {
-                window.location.assign(gmailUrl);
-            }
+    try {
+      // 1. Try sending via backend API (Resend if configured)
+      const res = await fetch("/api/contact", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ name, email, detail }),
+      });
 
-            setStatus("success");
-            setMessage(copy.successMessage);
-            form.reset();
-        } catch {
-            setStatus("error");
-            setMessage(copy.networkError);
-        }
+      if (res.ok) {
+        setStatus("success");
+        setMessage(copy.successMessage || "Message dispatched successfully.");
+        form.reset();
+        return;
+      }
+    } catch {
+      // Fallback to mailto/gmail draft
     }
 
-    return (
-        <form className="c--contact-form" onSubmit={handleSubmit}>
-            <label className="c--field">
-                {copy.nameLabel}
-                <input name="name" required />
-            </label>
+    // Fallback: direct Gmail compose
+    try {
+      const query = new URLSearchParams({
+        view: "cm",
+        fs: "1",
+        to: "duckg2083@gmail.com",
+        su: `Portfolio inquiry from ${name}`,
+        body: `Hi Duc,\n\n${detail}\n\nFrom: ${name} (${email})`,
+      });
+      const url = `https://mail.google.com/mail/?${query.toString()}`;
+      window.open(url, "_blank", "noopener,noreferrer");
+      setStatus("success");
+      setMessage(copy.successMessage);
+      form.reset();
+    } catch {
+      setStatus("error");
+      setMessage(copy.genericError);
+    }
+  }
 
-            <label className="c--field">
-                {copy.emailLabel}
-                <input name="email" type="email" required />
-            </label>
+  return (
+    <form className="form" onSubmit={handleSubmit}>
+      <div className="form-row">
+        <label className="field">
+          <span>{copy.nameLabel}</span>
+          <input
+            className="input"
+            name="name"
+            required
+            autoComplete="name"
+            placeholder="Nguyen Van A"
+          />
+        </label>
 
-            <label className="c--field">
-                {copy.detailsLabel}
-                <textarea name="detail" rows={6} required />
-            </label>
+        <label className="field">
+          <span>{copy.emailLabel}</span>
+          <input
+            className="input"
+            name="email"
+            type="email"
+            required
+            autoComplete="email"
+            placeholder="name@company.com"
+          />
+        </label>
+      </div>
 
-            <input
-                name="website"
-                tabIndex={-1}
-                autoComplete="off"
-                aria-hidden="true"
-                style={{ display: "none" }}
-            />
+      <label className="field">
+        <span>{copy.detailsLabel}</span>
+        <textarea
+          className="textarea"
+          name="detail"
+          rows={5}
+          required
+          placeholder="Briefly describe what you are building, timeline, or tech stack..."
+        />
+      </label>
 
-            <button className="c--btn c--btn-primary" type="submit" disabled={status === "loading"}>
-                {status === "loading" ? copy.sendingLabel : copy.submitLabel}
-            </button>
+      {/* Honeypot */}
+      <input
+        name="website"
+        tabIndex={-1}
+        autoComplete="off"
+        aria-hidden="true"
+        style={{ display: "none" }}
+      />
 
-            <p className="u--muted c--status-msg">{status !== "idle" ? message : ""}</p>
-        </form>
-    );
+      <div className="form-foot">
+        <button type="submit" className="btn btn-cobalt" disabled={status === "loading"}>
+          <Icon name="contact" size={14} />
+          {status === "loading" ? copy.sendingLabel : copy.submitLabel}
+        </button>
+
+        {status === "success" && (
+          <span className="form-msg ok">
+            <Icon name="check" size={13} style={{ verticalAlign: "-2px", marginRight: "4px" }} />
+            {message}
+          </span>
+        )}
+        {status === "error" && <span className="form-msg err">{message}</span>}
+      </div>
+    </form>
+  );
 }

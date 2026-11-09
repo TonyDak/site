@@ -1,19 +1,18 @@
-import type { Metadata } from "next";
-import { Space_Grotesk, Syne } from "next/font/google";
-import { Footer } from "@/components/layout/Footer";
-import { Header } from "@/components/layout/Header";
+import type { Metadata, Viewport } from "next";
+import { Geist, JetBrains_Mono } from "next/font/google";
 import { LanguageProvider } from "@/components/language/LanguageProvider";
 import { TransitionProvider } from "@/components/motion/TransitionProvider";
 import "./globals.css";
+import "../styles/portfolio.css";
 
-const headingFont = Space_Grotesk({
-  variable: "--font-heading",
-  subsets: ["latin"],
+const sans = Geist({
+  variable: "--font-geist",
+  subsets: ["latin", "latin-ext"],
 });
 
-const bodyFont = Syne({
-  variable: "--font-body",
-  subsets: ["latin"],
+const mono = JetBrains_Mono({
+  variable: "--font-jetbrains",
+  subsets: ["latin", "latin-ext"],
 });
 
 const siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? "http://localhost:3000";
@@ -21,61 +20,51 @@ const siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? "http://localhost:3000";
 export const metadata: Metadata = {
   metadataBase: new URL(siteUrl),
   title: {
-    default: "Portfolio | Duc Nguyen",
-    template: "%s | Duc Nguyen",
+    default: "Nguyễn Hữu Đức — Web & Mobile Developer",
+    template: "%s · ducnguyen.dev",
   },
-  description: "Web & Mobile Developer portfolio for Nguyễn Hữu Đức.",
+  description:
+    "Web & Mobile Developer building enterprise products with Next.js, React Native, NestJS and ASP.NET Core — growing into backend engineering with Java & Spring Boot.",
   openGraph: {
-    title: "Portfolio | Duc Nguyen",
-    description: "Web & Mobile Developer portfolio for Nguyễn Hữu Đức.",
+    title: "Nguyễn Hữu Đức — Web & Mobile Developer",
+    description: "Portfolio & engineering notes of Nguyễn Hữu Đức (ducnguyen.dev).",
     url: siteUrl,
-    siteName: "Duc Nguyen Portfolio",
+    siteName: "ducnguyen.dev",
     type: "website",
-    images: [
-      {
-        url: "/opengraph-image",
-        width: 1200,
-        height: 630,
-        alt: "Duc Nguyen Portfolio",
-      },
-    ],
+    images: [{ url: "/opengraph-image", width: 1200, height: 630, alt: "ducnguyen.dev" }],
   },
   twitter: {
     card: "summary_large_image",
-    title: "Portfolio | Duc Nguyen",
-    description: "Web & Mobile Developer portfolio for Nguyễn Hữu Đức.",
+    title: "Nguyễn Hữu Đức — Web & Mobile Developer",
+    description: "Portfolio & engineering notes of Nguyễn Hữu Đức (ducnguyen.dev).",
     images: ["/opengraph-image"],
   },
 };
 
+export const viewport: Viewport = {
+  themeColor: [
+    { media: "(prefers-color-scheme: dark)", color: "#0b0c10" },
+    { media: "(prefers-color-scheme: light)", color: "#f7f8fa" },
+  ],
+};
+
+// Dark is the default identity; a saved choice always wins.
 const themeScript = `(() => {
   try {
     const stored = localStorage.getItem('portfolio-theme');
-    const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
-    const theme = stored || (prefersDark ? 'dark' : 'light');
-    document.documentElement.classList.remove('theme-dark', 'theme-light');
-    document.documentElement.classList.add(theme === 'dark' ? 'theme-dark' : 'theme-light');
+    const theme = stored === 'light' ? 'light' : 'dark';
+    document.documentElement.classList.add('theme-' + theme);
   } catch {
-    document.documentElement.classList.add('theme-light');
+    document.documentElement.classList.add('theme-dark');
   }
 })();`;
 
-export default function RootLayout({
-  children,
-}: Readonly<{
-  children: React.ReactNode;
-}>) {
+export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
   return (
-    <html lang="en" suppressHydrationWarning className={`${headingFont.variable} ${bodyFont.variable}`}>
+    <html lang="en" suppressHydrationWarning className={`${sans.variable} ${mono.variable}`}>
       <body>
         <script dangerouslySetInnerHTML={{ __html: themeScript }} />
-        <LanguageProvider>
-          <TransitionProvider>
-            <Header />
-            <main>{children}</main>
-            <Footer />
-          </TransitionProvider>
-        </LanguageProvider>
+        <LanguageProvider><TransitionProvider>{children}</TransitionProvider></LanguageProvider>
       </body>
     </html>
   );

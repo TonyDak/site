@@ -1,0 +1,29 @@
+/* Restore the committed tiled transition with the current cobalt/neon palette. */
+.c--route-transition { position: fixed; inset: 0; z-index: 200; pointer-events: none; overflow: hidden; visibility: hidden; }
+.c--route-transition.is-leaving, .c--route-transition.is-entering { visibility: visible; }
+.c--route-transition__grid { display: grid; grid-template-columns: repeat(8, 1fr); grid-template-rows: repeat(5, 1fr); width: 100%; height: 100%; perspective: 1000px; }
+.c--route-transition__tile { background: var(--cobalt-deep); border: 1px solid var(--cobalt); opacity: 0; transform: scale(.1) rotateY(35deg); transition: transform 150ms var(--ease), opacity 150ms; transition-delay: var(--tile-delay); }
+.c--route-transition__tile:nth-child(7n) { background: var(--neon); border-color: var(--neon); }
+.is-leaving .c--route-transition__tile { opacity: 1; transform: scale(1.015) rotateY(0); }
+.is-entering .c--route-transition__tile { opacity: 0; transform: scale(.2) rotateX(-35deg); }
+
+.hero-visual { position: relative; min-height: 300px; isolation: isolate; }
+.c--hero-depth-stage { perspective: 1100px; display: grid; place-items: center; height: 100%; }
+.c--hero-depth-card { width: min(100%, 260px); overflow: hidden; position: relative; border: 1px solid var(--line-2); border-radius: 6px; background: var(--bg-1); box-shadow: 0 16px 32px -24px #0007; transform-style: preserve-3d; transition: transform 300ms var(--ease), border-color 300ms var(--ease); }
+.c--hero-depth-card:hover { border-color: var(--cobalt-2); }
+.portrait-file { display: flex; align-items: center; gap: 8px; height: 34px; padding: 0 12px; border-bottom: 1px solid var(--line); color: var(--text-2); font: 11px/1 var(--font-mono); }
+.portrait-file svg { color: var(--cobalt-2); }
+.depth-portrait { background: #070b18; }
+.depth-portrait img { display: block; width: 100%; height: auto; aspect-ratio: 1; object-fit: cover; }
+@media (max-width: 600px) { .c--hero-depth-card { max-width: 240px; } }
+
+.reveal-content { opacity: 1; }
+@media (prefers-reduced-motion: no-preference) {
+  .reveal-content { animation: section-arrive 650ms var(--ease) both; }
+  @keyframes section-arrive { from { opacity: 0; transform: translateY(14px); } to { opacity: 1; transform: translateY(0); } }
+}
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { scroll-behavior: auto !important; animation-duration: .01ms !important; animation-iteration-count: 1 !important; transition-duration: .01ms !important; }
+  .c--route-transition { display: none; }
+  .c--hero-depth-card { transform: none !important; }
+}

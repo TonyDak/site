@@ -1,56 +1,111 @@
-:root {
-  --bg: #fcfaf5;
-  --bg-strong: #1a1536;
-  --bg-elevated: #ffffff;
-  --bg-muted: #f3efe5;
+/* ==========================================================================
+   duc.dev design tokens — "Cobalt × Neon"
+   Graphite base, cobalt for structure/interaction, neon as a rare signal.
+   ========================================================================== */
 
-  --text: #181332;
-  --text-inverse: #f9f7ff;
-  --text-muted: #4c4767;
+:root,
+html.theme-dark {
+  color-scheme: dark;
 
-  --brand: #5851db;
-  --brand-hover: #4540b7;
-  --border: #dad1ea;
+  /* Surfaces (graphite, faint cool tint) */
+  --bg-0: #090a0d;          /* editor canvas */
+  --bg-1: #121317;          /* chrome / rails */
+  --bg-2: #17191f;          /* tabstrip, cards */
+  --bg-3: #161922;          /* hover / raised */
+  --line: #1c1f28;
+  --line-2: #282c38;
 
-  --space-1: 8px;
-  --space-2: 16px;
-  --space-3: 24px;
-  --space-4: 40px;
-  --space-5: 80px;
-  --space-6: 120px;
-  --space-7: 200px;
+  /* Text */
+  --text: #e8eaef;
+  --text-2: #a2a8b5;
+  --text-3: #858d9e;
 
-  --radius-sm: 10px;
-  --radius-md: 18px;
-  --radius-pill: 999px;
+  /* Cobalt — primary structure + interaction */
+  --cobalt: #3d6bff;
+  --cobalt-2: #7b9bff;      /* cobalt for text on dark */
+  --cobalt-deep: #1b3cc0;
+  --cobalt-a: rgba(61, 107, 255, 0.12);
+  --cobalt-a2: rgba(61, 107, 255, 0.22);
 
-  --duration-fast: 100ms;
-  --duration-base: 200ms;
-  --duration-emphasis: 300ms;
-  --ease-standard: cubic-bezier(0.2, 0, 0.38, 0.9);
+  /* Neon — signal only (live, primary CTA, cursor) */
+  --neon: #b6ff4d;
+  --neon-2: #9be832;
+  --neon-a: rgba(182, 255, 77, 0.1);
+  --on-neon: #0a0d05;
 
-  --container: 1160px;
+  --signature: linear-gradient(100deg, var(--cobalt-2) 0%, #9fd0ff 45%, var(--neon) 100%);
+
+  /* Syntax */
+  --sx-kw: #7b9bff;
+  --sx-str: #b6ff4d;
+  --sx-num: #f2c46d;
+  --sx-prop: #c7d2fe;
+  --sx-punct: #6a7080;
+  --sx-cm: #4d5363;
+  --sx-bool: #ff8fa3;
+
+  --shadow-lg: 0 24px 60px -12px rgba(0, 0, 0, 0.7);
+  --grid-dot: rgba(255, 255, 255, 0.035);
+  --aurora-1: rgba(61, 107, 255, 0.14);
+  --aurora-2: rgba(182, 255, 77, 0.05);
+
+  --radius-xs: 4px;
+  --radius-sm: 6px;
+  --radius-md: 6px;
+  --radius-lg: 14px;
+
+  --ease: cubic-bezier(0.2, 0.7, 0.2, 1);
+  --fast: 140ms;
+  --normal: 240ms;
+
+  --font-sans: var(--font-geist), "Segoe UI", system-ui, sans-serif;
+  --font-mono: var(--font-jetbrains), "Cascadia Code", "SF Mono", ui-monospace, monospace;
 }
 
-html.theme-dark {
-  --bg: #100d23;
-  --bg-strong: #0b0918;
-  --bg-elevated: #191337;
-  --bg-muted: #181238;
+html.theme-light {
+  color-scheme: light;
 
-  --text: #f6f3ff;
-  --text-inverse: #f6f3ff;
-  --text-muted: #c8c3df;
+  --bg-0: #ffffff;
+  --bg-1: #f7f8fa;
+  --bg-2: #f0f2f6;
+  --bg-3: #e8ebf1;
+  --line: #e3e6ed;
+  --line-2: #d2d7e1;
 
-  --brand: #7e78f0;
-  --brand-hover: #9d97ff;
-  --border: #3a3560;
+  --text: #0d1017;
+  --text-2: #4a5263;
+  --text-3: #626d80;
+
+  --cobalt: #1f4fe0;
+  --cobalt-2: #1f4fe0;
+  --cobalt-deep: #173aa8;
+  --cobalt-a: rgba(31, 79, 224, 0.08);
+  --cobalt-a2: rgba(31, 79, 224, 0.16);
+
+  --neon: #3d8c00;
+  --neon-2: #337500;
+  --neon-a: rgba(61, 140, 0, 0.1);
+  --on-neon: #ffffff;
+
+  --signature: linear-gradient(100deg, #1f4fe0 0%, #2b7bd6 50%, #3d8c00 100%);
+
+  --sx-kw: #1f4fe0;
+  --sx-str: #3d8c00;
+  --sx-num: #a05a00;
+  --sx-prop: #2a3550;
+  --sx-punct: #8a92a3;
+  --sx-cm: #9aa1b0;
+  --sx-bool: #c2185b;
+
+  --shadow-lg: 0 20px 50px -16px rgba(15, 23, 42, 0.18);
+  --grid-dot: rgba(15, 23, 42, 0.05);
+  --aurora-1: rgba(31, 79, 224, 0.07);
+  --aurora-2: rgba(61, 140, 0, 0.04);
 }
 
 @media (prefers-reduced-motion: reduce) {
   :root {
-    --duration-fast: 1ms;
-    --duration-base: 1ms;
-    --duration-emphasis: 1ms;
+    --fast: 1ms;
+    --normal: 1ms;
   }
 }

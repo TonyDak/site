@@ -1,50 +1,20 @@
 "use client";
 
-import Link, { type LinkProps } from "next/link";
-import { type MouseEvent, type ReactNode } from "react";
+import Link from "next/link";
+import type { ComponentProps } from "react";
 import { useTransitionNavigate } from "./TransitionProvider";
+import { getNavigationTarget } from "./navigation";
 
-type Props = LinkProps & {
-    className?: string;
-    children: ReactNode;
-};
-
-export function TransitionLink({ href, className, children, ...props }: Props) {
-    const { navigate } = useTransitionNavigate();
-    const hrefString = String(href);
-
-    return (
-        <Link
-            {...props}
-            href={href}
-            className={className}
-            onClick={(event: MouseEvent<HTMLAnchorElement>) => {
-                const isModified =
-                    event.metaKey ||
-                    event.ctrlKey ||
-                    event.shiftKey ||
-                    event.altKey ||
-                    event.button !== 0;
-
-                if (isModified) {
-                    return;
-                }
-
-                if (hrefString.startsWith("#")) {
-                    return;
-                }
-
-                const currentUrl = new URL(window.location.href);
-                const nextUrl = new URL(hrefString, window.location.origin);
-                if (currentUrl.pathname === nextUrl.pathname && nextUrl.hash) {
-                    return;
-                }
-
-                event.preventDefault();
-                navigate(hrefString);
-            }}
-        >
-            {children}
-        </Link>
-    );
+export function TransitionLink({ href, onNavigate, ...props }: ComponentProps<typeof Link>) {
+  const { navigate } = useTransitionNavigate();
+  return <Link {...props} href={href} onNavigate={(event) => {
+    let prevented = false;
+    onNavigate?.({ preventDefault: () => { prevented = true; event.preventDefault(); } });
+    if (prevented) return;
+    // Next preserves external, download and modifier-key navigation.
+    const target = getNavigationTarget(String(href), window.location.href);
+    if (!target) return;
+    event.preventDefault();
+    navigate(target);
+  }} />;
 }
