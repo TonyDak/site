@@ -4,6 +4,15 @@
 .editor-col { position: relative; isolation: isolate; background: var(--bg-0); }
 .editor { background: transparent; z-index: 1; }
 .editor-backdrop { position: absolute; inset: 38px 0 0; width: 100%; height: calc(100% - 38px); z-index: 0; pointer-events: none; }
+.editor-ambience { position: absolute; inset: 38px 0 0; z-index: 0; overflow: hidden; pointer-events: none; }
+.editor-ambience::before, .editor-ambience::after { content: ""; position: absolute; width: 75%; height: 70%; border-radius: 50%; }
+.editor-ambience::before { top: -10%; right: -10%; background: radial-gradient(ellipse, var(--cobalt-a), transparent 70%); }
+.editor-ambience::after { bottom: -15%; left: -15%; background: radial-gradient(ellipse, var(--neon-a), transparent 70%); }
+@media (prefers-reduced-motion: no-preference) {
+  .editor-ambience::before { animation: ambience-drift 24s ease-in-out infinite alternate; }
+  .editor-ambience::after { animation: ambience-drift 30s ease-in-out -8s infinite alternate-reverse; }
+  @keyframes ambience-drift { from { transform: translate3d(0, 0, 0) scale(1); opacity: .45; } to { transform: translate3d(-7%, 8%, 0) scale(1.12); opacity: .85; } }
+}
 .editor-depth { position: absolute; inset: 38px 0 0; z-index: 0; overflow: hidden; pointer-events: none; mask-image: linear-gradient(to bottom, transparent 28%, #000 82%); }
 .editor-depth canvas { display: block; width: 100%; height: 100%; }
 .editor-inner { max-width: 960px; padding: 72px 48px 96px; }

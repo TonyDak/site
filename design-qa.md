@@ -1,5 +1,17 @@
 # Portfolio visual and interaction acceptance
 
+## Background rollback - 2026-11-10
+
+At the user's request, restored the curved perspective grid from before the ribbon experiment. The background now uses one animated grid plane with a static editor grid/minimap and subtle ambient glows. Removed the particle effect and its temporary files. Slow repeating typing, the workspace header and public read-only blog navigation remain unchanged.
+
+Verified at localhost:3000 in a 1440x1000 browser capture: the grid canvas is mounted, the particle effect is absent and no page or console errors were recorded. TypeScript, changed-file ESLint, all 9 existing tests and the production build passed. This is visual/runtime verification, not a device performance benchmark. Earlier iteration notes below are historical.
+
+## Latest iteration — 2026-11-09
+
+The user requested a slower repeating headline, the reference workspace titlebar/Projects tree, and a richer editor background. Headline timing is now 100ms per grapheme, 2600ms hold, 55ms deletion and 800ms between cycles; 9/9 tests pass and a browser scenario observed typing, hold, deletion and a second cycle without navigation. The clean portrait file panel replaces the former orbit/wireframe decorations. The top bar now separates brand, workspace name and workspace branch context; the Projects heading and nested tree follow the provided crop.
+
+After the user reported the animated ribbon looked laggy, the live WebGL background was unmounted and the continuously redrawn 2D backdrop was made static. Ambient motion now uses CSS transform/opacity only. A fresh browser capture confirmed no WebGL canvas and no console/page errors; TypeScript, changed-file ESLint and production build passed. This establishes removal of those render loops, not a benchmark on the user's device. Three image-only background concepts are being explored; no proposed concept is selected or implemented yet. Earlier screenshots and the notes below are historical checkpoints, not the latest background acceptance.
+
 final result: passed
 
 Scope: existing portfolio redesign and the user's final hero/branding/public-blog revisions. This is acceptance against the requested adaptation, not a pixel-perfect Thinkrail clone.
