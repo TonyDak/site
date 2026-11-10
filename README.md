@@ -38,7 +38,9 @@ CONTACT_TO_EMAIL=you@your-domain.com
 CONTACT_FROM_EMAIL=Portfolio Bot <noreply@your-domain.com>
 ```
 
-The portfolio does not use a database. All site identity, profile, skills, and project content is typed and stored in `lib/content/data.ts`, then bundled with the application.
+Profile, skills and project content live in `lib/content/data.ts`. Blog content and admin sessions use MongoDB. Admin access fails closed without the required database/auth configuration. Public blog reads may use bundled articles when storage is unavailable.
+
+For secured admin setup, password reset and the prepared Cloudflare configuration for `https://www.ducnh.tech`, see [Cloudflare environment](docs/cloudflare-env.md). Local ignored files `.env.cloudflare` and `.cloudflare.secrets.json` contain the deployment values; `.env.example` is the safe template.
 
 If Resend variables are not provided, contact submissions are accepted and logged but email delivery is skipped.
 

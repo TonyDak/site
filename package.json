@@ -6,16 +6,24 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "eslint"
+    "lint": "eslint",
+    "test": "node --disable-warning=MODULE_TYPELESS_PACKAGE_JSON --import ./tests/register-ts.mjs --test tests/*.test.mjs",
+    "admin:setup": "node --disable-warning=MODULE_TYPELESS_PACKAGE_JSON scripts/admin-setup.mjs",
+    "env:cloudflare": "node scripts/export-cloudflare-env.mjs"
   },
   "dependencies": {
     "@types/three": "^0.185.4",
     "lucide-react": "^1.70.0",
     "mongodb": "^7.8.0",
-    "next": "16.2.2",
+    "next": "16.4.6",
     "react": "19.2.4",
     "react-dom": "19.2.4",
     "three": "^0.185.1"
+  },
+  "overrides": {
+    "@typescript-eslint/typescript-estree": {
+      "minimatch": "11.0.1"
+    }
   },
   "devDependencies": {
     "@tailwindcss/postcss": "^4",
@@ -24,7 +32,7 @@
     "@types/react-dom": "^19",
     "babel-plugin-react-compiler": "1.0.0",
     "eslint": "^9",
-    "eslint-config-next": "16.2.2",
+    "eslint-config-next": "16.4.6",
     "tailwindcss": "^4",
     "typescript": "^5"
   }

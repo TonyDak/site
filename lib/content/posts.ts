@@ -119,11 +119,11 @@ By keeping the inner layers independent, migrating from relational SQL to MongoD
   },
 ];
 
-function normalizePost(raw: any): Post {
+function normalizePost(raw: Partial<Post>): Post {
   let content = typeof raw.content === "string" ? raw.content : "";
   if (!content && Array.isArray(raw.sections)) {
     content = raw.sections
-      .map((sec: any) => `## ${sec.heading || ""}\n\n${(sec.paragraphs || []).join("\n\n")}`)
+      .map((sec) => `## ${sec.heading || ""}\n\n${(sec.paragraphs || []).join("\n\n")}`)
       .join("\n\n");
   }
 
@@ -139,29 +139,26 @@ function normalizePost(raw: any): Post {
   };
 }
 
-let inMemoryPosts = SEED_POSTS.map(normalizePost);
+const fallbackPosts = SEED_POSTS.map(normalizePost).filter(p => p.isPublished !== false);
 
-export async function getPosts(): Promise<Post[]> {
+export async function getPosts({ includeDrafts = false }: { includeDrafts?: boolean } = {}): Promise<Post[]> {
   try {
     const db = await getDb();
     if (!db) {
-      return inMemoryPosts;
+      if (includeDrafts) throw new Error("Admin storage unavailable.");
+      return fallbackPosts;
     }
 
-    const collection = db.collection<any>("posts");
-    const count = await collection.countDocuments();
-
-    if (count === 0) {
-      // Seed with initial posts
-      await collection.insertMany(SEED_POSTS as any);
-      return SEED_POSTS;
-    }
-
-    const docs = await collection.find({}).sort({ publishedAt: -1 }).toArray();
-    return docs.map(({ _id, ...rest }: any) => normalizePost(rest));
+    const collection = db.collection<Post>("posts");
+    const docs = await collection.find(includeDrafts ? {} : { isPublished: { $ne: false } }).sort({ publishedAt: -1 }).toArray();
+    // Keep the pre-existing bundled public content for a fresh database, without writing on GET.
+    // An all-draft collection is intentionally empty to public readers.
+    if (!includeDrafts && docs.length === 0 && await collection.countDocuments({}, { limit: 1 }) === 0) return fallbackPosts;
+    return docs.map(normalizePost);
   } catch (err) {
-    console.warn("[Posts] DB fetch failed, falling back to seed posts:", (err as Error)?.message);
-    return inMemoryPosts;
+    if (includeDrafts) throw err;
+    console.warn("[Posts] Public content storage unavailable; using bundled articles.");
+    return fallbackPosts;
   }
 }
 
@@ -174,21 +171,14 @@ export async function savePost(post: Post): Promise<{ success: boolean; error?: 
   try {
     const normalized = normalizePost(post);
     const db = await getDb();
-    if (db) {
-      const collection = db.collection<any>("posts");
+    if (!db) return { success: false, error: "Article storage unavailable." };
+    {
+      const collection = db.collection<Post>("posts");
       await collection.updateOne(
         { slug: normalized.slug },
         { $set: normalized },
         { upsert: true }
       );
-    }
-
-    // Update in-memory fallback
-    const idx = inMemoryPosts.findIndex((p) => p.slug === normalized.slug);
-    if (idx >= 0) {
-      inMemoryPosts[idx] = normalized;
-    } else {
-      inMemoryPosts.unshift(normalized);
     }
 
     return { success: true };

@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState, type FormEvent } from "react";
+import { useCallback, useEffect, useState, type FormEvent } from "react";
 import { TransitionLink as Link } from "@/components/motion/TransitionLink";
 import { IdeShell } from "@/components/ide/IdeShell";
 import { Icon } from "@/components/ide/icons";
@@ -8,6 +8,9 @@ import type { Post } from "@/lib/content/posts";
 
 export default function AdminPage() {
   const [authed, setAuthed] = useState(false);
+  const [checkingSession, setCheckingSession] = useState(true);
+  const [authBusy, setAuthBusy] = useState(false);
+  const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [authError, setAuthError] = useState("");
 
@@ -19,32 +22,56 @@ export default function AdminPage() {
   const [tags, setTags] = useState("");
   const [content, setContent] = useState("");
   const [saving, setSaving] = useState(false);
+  const [isPublished, setIsPublished] = useState(false);
   const [msg, setMsg] = useState<{ text: string; ok: boolean } | null>(null);
 
-  // Load existing posts
-  useEffect(() => {
-    fetch("/api/admin/posts")
-      .then((r) => r.json())
-      .then((d) => {
-        if (Array.isArray(d.posts)) {
-          setPosts(d.posts);
-          if (d.posts.length > 0 && !currentSlug) {
-            loadPost(d.posts[0]);
-          }
-        }
-      })
-      .catch(() => {});
-  }, []);
-
-  const loadPost = (p: Post) => {
+  const loadPost = useCallback((p: Post) => {
     setCurrentSlug(p.slug);
     setTitle(p.title);
     setSlug(p.slug);
     setExcerpt(p.excerpt ?? "");
     setTags((p.tags ?? []).join(", "));
     setContent(p.content ?? "");
+    setIsPublished(p.isPublished !== false);
     setMsg(null);
-  };
+  }, []);
+
+  const loadPosts = useCallback(async (selectFirst = false, signal?: AbortSignal) => {
+    const response = await fetch("/api/admin/posts", { cache: "no-store", signal });
+    const data = await response.json();
+    if (!response.ok) {
+      if (response.status === 401) {
+        setAuthed(false);
+        setPosts([]);
+        setAuthError("Your session has expired. Sign in again.");
+      }
+      throw new Error(data.error || "Could not load posts.");
+    }
+    setPosts(data.posts);
+    if (selectFirst && data.posts.length) loadPost(data.posts[0]);
+  }, [loadPost]);
+
+  useEffect(() => {
+    const controller = new AbortController();
+    async function restoreSession() {
+      try {
+        const response = await fetch("/api/admin/auth", { cache: "no-store", signal: controller.signal });
+        if (response.ok) {
+          await loadPosts(true, controller.signal);
+          setAuthed(true);
+        } else if (response.status !== 401) {
+          const data = await response.json();
+          setAuthError(data.error || "Admin service unavailable.");
+        }
+      } catch (error) {
+        if (!controller.signal.aborted) setAuthError((error as Error).message || "Could not check your session.");
+      } finally {
+        if (!controller.signal.aborted) setCheckingSession(false);
+      }
+    }
+    void restoreSession();
+    return () => controller.abort();
+  }, [loadPosts]);
 
   const newPost = () => {
     setCurrentSlug("");
@@ -53,6 +80,7 @@ export default function AdminPage() {
     setExcerpt("");
     setTags("Architecture, Backend");
     setContent("## Introduction\n\nWrite article content here...");
+    setIsPublished(false);
     setMsg(null);
   };
 
@@ -68,14 +96,38 @@ export default function AdminPage() {
     }
   };
 
-  const handleAuth = (e: FormEvent) => {
+  const handleAuth = async (e: FormEvent) => {
     e.preventDefault();
-    if (password === "admin" || password === "local-dev-only" || password.length >= 4) {
+    setAuthBusy(true);
+    setAuthError("");
+    try {
+      const response = await fetch("/api/admin/auth", {
+        method: "POST", headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ username, password }),
+      });
+      const data = await response.json();
+      setPassword("");
+      if (!response.ok) throw new Error(data.error || "Sign-in failed.");
+      await loadPosts(true);
       setAuthed(true);
+    } catch (error) { setAuthError((error as Error).message || "Sign-in failed."); }
+    finally { setPassword(""); setAuthBusy(false); }
+  };
+
+  const handleLogout = async () => {
+    setAuthBusy(true);
+    try {
+      const response = await fetch("/api/admin/auth", { method: "DELETE", headers: { "Content-Type": "application/json" }, body: "{}" });
+      const data = await response.json();
+      if (!response.ok) throw new Error(data.error || "Sign-out failed.");
+      setAuthed(false);
+      setPosts([]);
+      setPassword("");
+      setTitle(""); setSlug(""); setContent(""); setExcerpt(""); setTags(""); setCurrentSlug("");
+      setMsg(null);
       setAuthError("");
-    } else {
-      setAuthError("Invalid credentials.");
-    }
+    } catch (error) { setMsg({ text: (error as Error).message, ok: false }); }
+    finally { setAuthBusy(false); }
   };
 
   const handleSave = async (e: FormEvent) => {
@@ -96,20 +148,24 @@ export default function AdminPage() {
             .split(",")
             .map((t) => t.trim())
             .filter(Boolean),
-          secret: password,
+          isPublished,
         }),
       });
 
       const data = await res.json();
       if (!res.ok) {
+        if (res.status === 401) {
+          setAuthed(false);
+          setPosts([]);
+          setAuthError("Your session has expired. Sign in again.");
+        }
         throw new Error(data.error || "Save failed");
       }
 
       setMsg({ text: "Post saved to MongoDB successfully.", ok: true });
 
       // Refresh list
-      const updated = await fetch("/api/admin/posts").then((r) => r.json());
-      if (Array.isArray(updated.posts)) setPosts(updated.posts);
+      await loadPosts();
       setCurrentSlug(slug);
     } catch (err) {
       setMsg({ text: (err as Error).message || "Save error", ok: false });
@@ -131,27 +187,36 @@ export default function AdminPage() {
               Studio Authentication
             </h2>
             <p className="muted" style={{ fontSize: "13px", marginBottom: "18px" }}>
-              Enter your admin passphrase to access the MongoDB content studio.
+              Sign in to manage your articles.
             </p>
 
             <form onSubmit={handleAuth} style={{ display: "flex", flexDirection: "column", gap: "12px" }}>
               <label className="field">
-                <span>PASSPHRASE</span>
+                <span>USERNAME</span>
+                <input name="username" className="input mono" autoComplete="username" required maxLength={64}
+                  value={username} onChange={(e) => setUsername(e.target.value)} disabled={checkingSession || authBusy} />
+              </label>
+              <label className="field">
+                <span>PASSWORD</span>
                 <input
                   type="password"
                   className="input mono"
-                  autoFocus
+                  name="password"
+                  autoComplete="current-password"
+                  required
+                  maxLength={256}
+                  disabled={checkingSession || authBusy}
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   placeholder="Enter admin password..."
                 />
               </label>
 
-              {authError && <span style={{ color: "#ff8fa3", fontSize: "12px" }}>{authError}</span>}
+              {authError && <span role="alert" style={{ color: "#ff8fa3", fontSize: "12px" }}>{authError}</span>}
 
-              <button type="submit" className="btn btn-cobalt" style={{ marginTop: "4px" }}>
+              <button type="submit" disabled={checkingSession || authBusy} className="btn btn-cobalt" style={{ marginTop: "4px" }}>
                 <Icon name="key" size={14} />
-                Unlock Studio
+                {checkingSession ? "Checking session..." : authBusy ? "Signing in..." : "Sign in"}
               </button>
             </form>
           </div>
@@ -174,6 +239,9 @@ export default function AdminPage() {
         </div>
 
         <div style={{ display: "flex", gap: "8px" }}>
+          <button type="button" className="btn btn-sm btn-ghost" disabled={authBusy || saving} onClick={handleLogout}>
+            {authBusy ? "Signing out..." : "Sign out"}
+          </button>
           <button type="button" className="btn btn-sm btn-ghost" onClick={newPost}>
             <Icon name="plus" size={13} /> New draft
           </button>
@@ -258,6 +326,10 @@ export default function AdminPage() {
                 onChange={(e) => setExcerpt(e.target.value)}
                 placeholder="Short summary for the index card..."
               />
+            </label>
+            <label style={{ display: "flex", gap: "8px", alignItems: "center", fontSize: "13px" }}>
+              <input type="checkbox" checked={isPublished} onChange={(e) => setIsPublished(e.target.checked)} />
+              Published — visible on the public blog
             </label>
           </div>
 
