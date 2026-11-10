@@ -34,6 +34,10 @@
 
 User supplied all five R2 variables in local configuration and requested restart plus Cloudflare env export. Re-exported ignored `.env.cloudflare` and `.cloudflare.secrets.json`; all R2 variables and both S3 secrets were present without printing values. Restarted the task-owned Next dev server on port 3000. Live check through the actual upload factory and R2 transport (in-process test gate, no browser login/session modification): a tiny PNG upload succeeded, public GET returned 200 with byte-for-byte identical image/png content, then the test object's signed DELETE returned 204. This validates real S3 credentials, bucket write permissions and public URL access; it is not a deployed Worker/browser end-to-end assertion. Wrangler `whoami` remains unauthenticated, so runtime variables on Cloudflare were not changed remotely. Existing Orca article images remain bundled static assets; this check did not migrate or edit the article.
 
+### Orca images migrated to R2
+
+User explicitly requested updating the Orca article images after configuring R2. Uploaded four original JPEGs under content-hashed `blog/orca/` keys, verified each public response against source bytes, and hosted/verified the upstream MIT notice alongside them. Backed up the article as EJSON, then updated only its content image URLs, storage attribution/license link and cover URL with an optimistic equality check. Preserved title, publication date and publication status; database still has exactly one post. Source Markdown/metadata were synchronized. Local real browser verified R2 cover, three body images/captions, index cover and mobile layout. Production returned 200 but rendered zero R2 image tags and contained the three body URLs as content: old deployed renderer still requires deployment. No Worker deployment was performed.
+
 ## Review focus
 
 - Malicious URLs, raw HTML and malformed embeds cannot execute script or reach arbitrary iframe origins.

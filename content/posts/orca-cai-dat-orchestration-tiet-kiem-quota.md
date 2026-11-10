@@ -84,7 +84,7 @@ Nếu tài liệu trên web khác với bộ skill của bản đang cài, trư�
 
 ### Một lượt làm việc đầu tiên trong giao diện
 
-![Cùng một cuộc hội thoại agent hiển thị ở giao diện chat và terminal của Orca](/blog/orca/chat-terminal.jpg "Chat và terminal là hai cách xem cùng luồng làm việc; chọn cách thuận tiện cho việc theo dõi và phản hồi.")
+![Cùng một cuộc hội thoại agent hiển thị ở giao diện chat và terminal của Orca](https://media.ducnh.tech/blog/orca/chat-terminal-532ad17d88cd8b8d.jpg "Chat và terminal là hai cách xem cùng luồng làm việc; chọn cách thuận tiện cho việc theo dõi và phản hồi.")
 
 [Hướng dẫn Chat UI và terminal](https://www.onorca.dev/docs/agents/native-chat).
 
@@ -96,7 +96,7 @@ Khi đã quen luồng một agent, mới nhờ coordinator giao một phần vi�
 
 ## 4. Workspace hiện tại hay worktree mới?
 
-![Tạo một worktree riêng trong Orca cạnh các phiên agent đang chạy](/blog/orca/worktrees.jpg "Mỗi nhánh công việc có workspace và agent riêng; chọn worktree khi cần tách vùng ghi file.")
+![Tạo một worktree riêng trong Orca cạnh các phiên agent đang chạy](https://media.ducnh.tech/blog/orca/worktrees-1402c6e3c0c7dd17.jpg "Mỗi nhánh công việc có workspace và agent riêng; chọn worktree khi cần tách vùng ghi file.")
 
 [Nguồn ảnh và tài liệu worktree của Orca](https://www.onorca.dev/docs/model/worktrees).
 
@@ -142,7 +142,7 @@ Câu này xác định được đầu ra, quyền của worker và việc coord
 
 ## 6. Một lượt orchestration từ đầu đến cuối
 
-![Coordinator chia một nhiệm vụ cho các worker rồi nhận báo cáo kết quả trong Orca](/blog/orca/orchestration.jpg "Coordinator giao việc có phạm vi rõ ràng; worker thực thi và trả lại bằng chứng kiểm tra.")
+![Coordinator chia một nhiệm vụ cho các worker rồi nhận báo cáo kết quả trong Orca](https://media.ducnh.tech/blog/orca/orchestration-eb5e6a713e19570b.jpg "Coordinator giao việc có phạm vi rõ ràng; worker thực thi và trả lại bằng chứng kiểm tra.")
 
 [Xem hướng dẫn orchestration chính thức](https://www.onorca.dev/docs/cli/orchestration).
 
@@ -409,4 +409,6 @@ Bài viết tổng hợp kinh nghiệm vận hành của tôi và đối chiếu
 
 Orca phát hành thường xuyên. Trước khi áp dụng vào môi trường mới, kiểm tra version, trợ giúp lệnh, skill đi kèm và một task nhỏ trên repository thử nghiệm. Việc một command hợp lệ không đồng nghĩa toàn bộ luồng đã được kiểm chứng trên mọi máy, provider hay remote runtime.
 
-Ảnh minh họa được cập nhật ngày 11/11/2026 từ [repository chính thức của Orca](https://github.com/stablyai/orca), theo giấy phép MIT. Phiên bản giao diện của bạn có thể khác. Ảnh được lưu cùng website để không phụ thuộc hotlink từ nguồn ngoài.
+Ảnh minh họa được cập nhật ngày 11/11/2026 từ [repository chính thức của Orca](https://github.com/stablyai/orca), theo giấy phép MIT. Phiên bản giao diện của bạn có thể khác. Ảnh được lưu trên Cloudflare R2 của website để không phụ thuộc hotlink từ nguồn ngoài.
+
+[Thông báo bản quyền và giấy phép ảnh minh họa](https://media.ducnh.tech/blog/orca/LICENSE-upstream.txt).

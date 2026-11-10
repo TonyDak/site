@@ -10,6 +10,6 @@
     "Developer Tools"
   ],
   "isPublished": true,
-  "coverImage": "/blog/orca/overview.jpg",
+  "coverImage": "https://media.ducnh.tech/blog/orca/overview-163711b5d3d04851.jpg",
   "coverAlt": "Giao diện Orca với coordinator, các worker và ứng dụng companion minh họa"
 }
