@@ -6,6 +6,15 @@ Các lệnh được đối chiếu với Orca CLI 1.4.255 trên Windows vào ng
 
 ## 1. Orca làm gì trong quy trình phát triển phần mềm?
 
+### Liên kết để bắt đầu
+
+- [Tải Orca cho Windows, macOS và Linux](https://www.onorca.dev/download)
+- [GitHub Releases và các bản phát hành trước](https://github.com/stablyai/orca/releases)
+- [Hướng dẫn cài đặt chính thức](https://www.onorca.dev/docs/install)
+- [Mã nguồn Orca trên GitHub](https://github.com/stablyai/orca)
+
+Ảnh bìa và các ảnh bên dưới lấy từ tài liệu công khai của dự án Orca. Đây là workspace minh họa của nhà phát triển, không phải ảnh chụp các phiên làm việc riêng của tôi.
+
 Orca là môi trường làm việc cho coding agent. Trong cùng một ứng dụng, tôi có thể mở repository, tạo workspace, chạy agent, xem diff và kiểm tra giao diện bằng trình duyệt. Một workspace có thể gắn với một Git worktree riêng để các nhánh công việc không ghi đè file của nhau.
 
 Điểm quan trọng là phân biệt ba vai trò:
@@ -75,6 +84,10 @@ Nếu tài liệu trên web khác với bộ skill của bản đang cài, trư�
 
 ### Một lượt làm việc đầu tiên trong giao diện
 
+![Cùng một cuộc hội thoại agent hiển thị ở giao diện chat và terminal của Orca](/blog/orca/chat-terminal.jpg "Chat và terminal là hai cách xem cùng luồng làm việc; chọn cách thuận tiện cho việc theo dõi và phản hồi.")
+
+[Hướng dẫn Chat UI và terminal](https://www.onorca.dev/docs/agents/native-chat).
+
 Sau khi thêm repository, chọn workspace đúng với thư mục code, mở một tab agent và chọn harness đã đăng nhập. Dùng bề mặt Chat hay Terminal tùy cách làm việc và khả năng của agent; không cần đổi cả hệ thống chỉ để thử một task.
 
 Lượt đầu nên nhỏ và dễ xác nhận, chẳng hạn yêu cầu đọc component, chỉ ra nguyên nhân một lỗi hiển thị rồi sửa trong phạm vi đã xác định. Xem diff trước khi nhận kết quả. Với ứng dụng web, mở preview tương ứng với workspace và kiểm tra hành vi thật, không chỉ tin ảnh hoặc thông báo build thành công.
@@ -82,6 +95,10 @@ Lượt đầu nên nhỏ và dễ xác nhận, chẳng hạn yêu cầu đọc 
 Khi đã quen luồng một agent, mới nhờ coordinator giao một phần việc cho worker. Cách này giúp phân biệt lỗi của project, lỗi đăng nhập harness và lỗi của orchestration. Tôi không dùng một task production lớn để thử đồng thời mọi tính năng mới.
 
 ## 4. Workspace hiện tại hay worktree mới?
+
+![Tạo một worktree riêng trong Orca cạnh các phiên agent đang chạy](/blog/orca/worktrees.jpg "Mỗi nhánh công việc có workspace và agent riêng; chọn worktree khi cần tách vùng ghi file.")
+
+[Nguồn ảnh và tài liệu worktree của Orca](https://www.onorca.dev/docs/model/worktrees).
 
 Không phải task nào cũng cần tạo worktree. Với một thay đổi nhỏ và chỉ có một người ghi file, dùng workspace hiện tại thường ít tốn công chuẩn bị hơn. Review chỉ đọc cũng có thể chạy trong cùng workspace nếu phạm vi rõ ràng.
 
@@ -124,6 +141,10 @@ không gọi database thật. Tôi sẽ quyết định bản sửa sau khi đ�
 Câu này xác định được đầu ra, quyền của worker và việc coordinator còn phải làm. Một brief có chữ “report back” là công việc có giám sát, không phải chuyển giao rồi thôi.
 
 ## 6. Một lượt orchestration từ đầu đến cuối
+
+![Coordinator chia một nhiệm vụ cho các worker rồi nhận báo cáo kết quả trong Orca](/blog/orca/orchestration.jpg "Coordinator giao việc có phạm vi rõ ràng; worker thực thi và trả lại bằng chứng kiểm tra.")
+
+[Xem hướng dẫn orchestration chính thức](https://www.onorca.dev/docs/cli/orchestration).
 
 Tôi bắt đầu bằng kết quả người dùng cần, sau đó tìm phần có thể giao thành một đơn vị độc lập. Worker nên nhận một mục tiêu có thể kiểm chứng, không phải một danh sách mơ hồ các file để “nghiên cứu thêm”.
 
@@ -378,12 +399,14 @@ Tôi muốn Orca giúp giảm ma sát giữa các phiên làm việc. Khi phải
 
 Bài viết tổng hợp kinh nghiệm vận hành của tôi và đối chiếu với CLI đang cài. Các ví dụ task dùng dữ liệu minh họa; không chứa nội dung riêng của dự án, credential hoặc transcript hội thoại. Các khuyến nghị về quota và policy là lựa chọn thực hành, không phải một benchmark công bố của nhà phát triển Orca.
 
-- Mã nguồn Orca: https://github.com/stablyai/orca
-- Tải ứng dụng: https://www.onorca.dev/download
-- Hướng dẫn cài đặt: https://www.onorca.dev/docs/install
-- CLI: https://www.onorca.dev/docs/cli/overview
-- Orchestration: https://www.onorca.dev/docs/cli/orchestration
-- Worktree: https://www.onorca.dev/docs/model/worktrees
-- Theo dõi usage: https://www.onorca.dev/docs/agents/usage-tracking
+- [Mã nguồn Orca](https://github.com/stablyai/orca)
+- [Tải ứng dụng](https://www.onorca.dev/download)
+- [Hướng dẫn cài đặt](https://www.onorca.dev/docs/install)
+- [CLI](https://www.onorca.dev/docs/cli/overview)
+- [Orchestration](https://www.onorca.dev/docs/cli/orchestration)
+- [Worktree](https://www.onorca.dev/docs/model/worktrees)
+- [Theo dõi usage](https://www.onorca.dev/docs/agents/usage-tracking)
 
 Orca phát hành thường xuyên. Trước khi áp dụng vào môi trường mới, kiểm tra version, trợ giúp lệnh, skill đi kèm và một task nhỏ trên repository thử nghiệm. Việc một command hợp lệ không đồng nghĩa toàn bộ luồng đã được kiểm chứng trên mọi máy, provider hay remote runtime.
+
+Ảnh minh họa được cập nhật ngày 11/11/2026 từ [repository chính thức của Orca](https://github.com/stablyai/orca), theo giấy phép MIT. Phiên bản giao diện của bạn có thể khác. Ảnh được lưu cùng website để không phụ thuộc hotlink từ nguồn ngoài.

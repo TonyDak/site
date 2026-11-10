@@ -88,6 +88,17 @@ test('authenticated reads include drafts; ordinary edits preserve draft status a
   assert.equal(result.isPublished, false);
   assert.equal(result.publishedAt, '2026-01-01');
 });
+
+test('covers survive save and older-client edits; unsafe cover values are rejected', async () => {
+  const f=fixture(); const cookie=await f.signIn();
+  const fields={title:'A cover',slug:f.draft.slug,content:'Body',coverImage:'https://media.example.com/cover.png',coverAlt:'Cover description'};
+  let response=await f.posts.POST(f.request('POST',fields,cookie)); assert.equal(response.status,200);
+  assert.equal((await response.json()).post.coverImage,fields.coverImage);
+  response=await f.posts.POST(f.request('POST',{title:'Older client',slug:f.draft.slug,content:'Body'},cookie));
+  assert.equal((await response.json()).post.coverAlt,'Cover description');assert.equal(f.draft.coverImage,fields.coverImage);
+  for(const coverImage of ['javascript:alert(1)','data:image/svg+xml,bad',{},'https://user:pass@example.com/a.png']) assert.equal((await f.posts.POST(f.request('POST',{...fields,coverImage},cookie))).status,400);
+  response=await f.posts.POST(f.request('POST',{...fields,coverImage:'',coverAlt:''},cookie));assert.equal(response.status,200);assert.equal(f.draft.coverImage,'');
+});
 test('session storage outage and duplicate cookies fail closed', async () => {
   const f = fixture();
   const cookie = await f.signIn();

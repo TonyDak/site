@@ -4,6 +4,8 @@ Production origin: `https://www.ducnh.tech` (no trailing slash). Admin: `https:/
 
 ## Prepared files
 
+For blog media uploads, see [blog-media.md](blog-media.md) for the five R2 variables, bucket setup, limits and verification steps. Media is optional; missing R2 configuration does not disable blog reading.
+
 - `.env.local`: local development; `ADMIN_ORIGIN=http://localhost:3000`.
 - `.env.cloudflare`: full production configuration, using the existing MongoDB and mail values and the new password hash.
 - `.cloudflare.secrets.json`: only secret values, suitable for Wrangler bulk secret import.

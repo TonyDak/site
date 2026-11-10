@@ -1,6 +1,7 @@
 import type { Post } from "../content/posts";
 import type { createAuthHttp } from "./http";
 import { privateJson, readJson } from "./http";
+import { safeUrl } from "../content/markdown";
 
 type Gate = Pick<ReturnType<typeof createAuthHttp>, "authorize" | "mutationError">;
 export function createPostHandlers({ gate, getPosts, savePost }: {
@@ -26,7 +27,9 @@ export function createPostHandlers({ gate, getPosts, savePost }: {
         || (body.slug !== undefined && typeof body.slug !== "string")
         || (body.excerpt !== undefined && (typeof body.excerpt !== "string" || body.excerpt.length > 500))
         || (body.tags !== undefined && (!Array.isArray(body.tags) || body.tags.length > 20 || body.tags.some(t => typeof t !== "string" || t.length > 50)))
-        || (body.isPublished !== undefined && typeof body.isPublished !== "boolean")) {
+        || (body.isPublished !== undefined && typeof body.isPublished !== "boolean")
+        || (body.coverImage !== undefined && (typeof body.coverImage !== "string" || body.coverImage.length > 2048 || (body.coverImage !== "" && !safeUrl(body.coverImage))))
+        || (body.coverAlt !== undefined && (typeof body.coverAlt !== "string" || body.coverAlt.length > 200))) {
         return privateJson({ error: "Invalid article fields or article too large." }, 400);
       }
       const slug = typeof body.slug === "string" ? body.slug.trim() : body.title.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/(^-|-$)/g, "");
@@ -38,12 +41,16 @@ export function createPostHandlers({ gate, getPosts, savePost }: {
         publishedAt: new Date().toISOString().split("T")[0],
         readTime: `${Math.max(1, Math.ceil(body.content.split(/\s+/).length / 200))} min read`,
         isPublished: body.isPublished !== false,
+        coverImage: typeof body.coverImage === "string" ? body.coverImage : "",
+        coverAlt: typeof body.coverAlt === "string" ? body.coverAlt.trim() : "",
       };
       try {
         const existing = (await getPosts()).find(p => p.slug === slug);
         if (existing) {
           post.publishedAt = existing.publishedAt;
           if (body.isPublished === undefined) post.isPublished = existing.isPublished !== false;
+          if (body.coverImage === undefined) post.coverImage = existing.coverImage ?? "";
+          if (body.coverAlt === undefined) post.coverAlt = existing.coverAlt ?? "";
         }
         if (!(await savePost(post)).success) return privateJson({ error: "Could not save the article. Try again." }, 503);
         return privateJson({ ok: true, post });

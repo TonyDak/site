@@ -1,4 +1,5 @@
 import { withDb } from "@/lib/db/mongo";
+import { safeUrl } from "./markdown";
 
 export type Post = {
   slug: string;
@@ -8,6 +9,8 @@ export type Post = {
   publishedAt: string;
   readTime: string;
   tags: string[];
+  coverImage?: string;
+  coverAlt?: string;
   sections?: Array<{
     heading: string;
     paragraphs: string[];
@@ -135,6 +138,8 @@ function normalizePost(raw: Partial<Post>): Post {
     publishedAt: raw.publishedAt || "2026-01-01",
     readTime: raw.readTime || "5 min read",
     tags: Array.isArray(raw.tags) ? raw.tags : ["Engineering"],
+    coverImage: safeUrl(raw.coverImage) ?? "",
+    coverAlt: typeof raw.coverAlt === "string" ? raw.coverAlt : "",
     isPublished: raw.isPublished !== false,
   };
 }

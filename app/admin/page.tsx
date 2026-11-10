@@ -1,6 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useState, type FormEvent } from "react";
+import { PostMediaEditor } from "@/components/admin/PostMediaEditor";
 import { TransitionLink as Link } from "@/components/motion/TransitionLink";
 import { IdeShell } from "@/components/ide/IdeShell";
 import { Icon } from "@/components/ide/icons";
@@ -21,6 +22,10 @@ export default function AdminPage() {
   const [excerpt, setExcerpt] = useState("");
   const [tags, setTags] = useState("");
   const [content, setContent] = useState("");
+  const [coverImage, setCoverImage] = useState("");
+  const [coverAlt, setCoverAlt] = useState("");
+  const [mediaBusy, setMediaBusy] = useState(false);
+  const [editorRevision, setEditorRevision] = useState(0);
   const [saving, setSaving] = useState(false);
   const [isPublished, setIsPublished] = useState(false);
   const [msg, setMsg] = useState<{ text: string; ok: boolean } | null>(null);
@@ -32,6 +37,8 @@ export default function AdminPage() {
     setExcerpt(p.excerpt ?? "");
     setTags((p.tags ?? []).join(", "));
     setContent(p.content ?? "");
+    setCoverImage(p.coverImage ?? ""); setCoverAlt(p.coverAlt ?? "");
+    setEditorRevision(value => value + 1);
     setIsPublished(p.isPublished !== false);
     setMsg(null);
   }, []);
@@ -81,6 +88,7 @@ export default function AdminPage() {
     setTags("Architecture, Backend");
     setContent("## Introduction\n\nWrite article content here...");
     setIsPublished(false);
+    setCoverImage(""); setCoverAlt(""); setEditorRevision(value => value + 1);
     setMsg(null);
   };
 
@@ -124,6 +132,7 @@ export default function AdminPage() {
       setPosts([]);
       setPassword("");
       setTitle(""); setSlug(""); setContent(""); setExcerpt(""); setTags(""); setCurrentSlug("");
+      setCoverImage(""); setCoverAlt("");
       setMsg(null);
       setAuthError("");
     } catch (error) { setMsg({ text: (error as Error).message, ok: false }); }
@@ -132,6 +141,7 @@ export default function AdminPage() {
 
   const handleSave = async (e: FormEvent) => {
     e.preventDefault();
+    if (mediaBusy || saving) return;
     setSaving(true);
     setMsg(null);
 
@@ -144,6 +154,8 @@ export default function AdminPage() {
           slug,
           excerpt,
           content,
+          coverImage,
+          coverAlt,
           tags: tags
             .split(",")
             .map((t) => t.trim())
@@ -239,10 +251,10 @@ export default function AdminPage() {
         </div>
 
         <div style={{ display: "flex", gap: "8px" }}>
-          <button type="button" className="btn btn-sm btn-ghost" disabled={authBusy || saving} onClick={handleLogout}>
+          <button type="button" className="btn btn-sm btn-ghost" disabled={authBusy || saving || mediaBusy} onClick={handleLogout}>
             {authBusy ? "Signing out..." : "Sign out"}
           </button>
-          <button type="button" className="btn btn-sm btn-ghost" onClick={newPost}>
+          <button type="button" className="btn btn-sm btn-ghost" disabled={saving || mediaBusy} onClick={newPost}>
             <Icon name="plus" size={13} /> New draft
           </button>
           <Link href="/blog" className="btn btn-sm btn-ghost">
@@ -264,6 +276,7 @@ export default function AdminPage() {
                 type="button"
                 key={p.slug}
                 className={`studio-item ${currentSlug === p.slug ? "on" : ""}`}
+                disabled={saving || mediaBusy}
                 onClick={() => loadPost(p)}
               >
                 <span className="t">{p.title}</span>
@@ -333,29 +346,9 @@ export default function AdminPage() {
             </label>
           </div>
 
-          {/* Split Pane: Raw Markdown / Live Preview */}
-          <div className="split">
-            <textarea
-              className="textarea mono"
-              required
-              rows={18}
-              value={content}
-              onChange={(e) => setContent(e.target.value)}
-              placeholder="## Section Heading&#10;&#10;Write markdown content here..."
-            />
-            <div className="preview">
-              <div className="label">PREVIEW</div>
-              <div className="prose">
-                {content.split("\n").map((l, idx) => {
-                  if (l.startsWith("## ")) return <h2 key={idx}>{l.replace("## ", "")}</h2>;
-                  if (l.startsWith("### ")) return <h3 key={idx}>{l.replace("### ", "")}</h3>;
-                  if (l.startsWith("- ")) return <li key={idx}>{l.replace("- ", "")}</li>;
-                  if (l.trim().length > 0) return <p key={idx}>{l}</p>;
-                  return null;
-                })}
-              </div>
-            </div>
-          </div>
+          <PostMediaEditor key={editorRevision} content={content} onChange={setContent}
+            coverImage={coverImage} coverAlt={coverAlt} onCover={setCoverImage} onCoverAlt={setCoverAlt}
+            onBusy={setMediaBusy} disabled={saving || authBusy} />
 
           <div
             style={{
@@ -367,7 +360,7 @@ export default function AdminPage() {
             }}
           >
             <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
-              <button type="submit" className="btn btn-cobalt" disabled={saving}>
+              <button type="submit" className="btn btn-cobalt" disabled={saving || mediaBusy}>
                 <Icon name="save" size={14} />
                 {saving ? "Writing to MongoDB..." : "Save to MongoDB"}
               </button>

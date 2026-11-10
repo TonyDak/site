@@ -6,6 +6,7 @@ import { useLanguage } from "@/components/language/LanguageProvider";
 import { ui } from "@/lib/content/ui";
 import { Icon } from "@/components/ide/icons";
 import type { Post } from "@/lib/content/posts";
+import { ArticleCover } from "@/components/blog/ArticleContent";
 
 export function BlogListClient({ posts }: { posts: Post[] }) {
   const { locale } = useLanguage();
@@ -60,6 +61,7 @@ export function BlogListClient({ posts }: { posts: Post[] }) {
             <Link key={post.slug} href={`/blog/${post.slug}`} className="post-row">
               <div className="post-date">{post.publishedAt}</div>
               <div>
+                <ArticleCover url={post.coverImage} alt={post.coverAlt || post.title} />
                 <h2 className="post-title">{post.title}</h2>
                 <p className="post-excerpt">{post.excerpt}</p>
                 <div className="chip-row">

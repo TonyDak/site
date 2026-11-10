@@ -47,10 +47,10 @@ function digest(value: string): string {
   return createHash("sha256").update(value).digest("hex");
 }
 
-export function isAllowedMutation(request: Request, config: AuthConfig | null): boolean {
+export function isAllowedMutation(request: Request, config: AuthConfig | null, contentType = "application/json"): boolean {
   return !!config && request.headers.get("origin") === config.origin
     && request.headers.get("sec-fetch-site") !== "cross-site"
-    && request.headers.get("content-type")?.split(";")[0].trim().toLowerCase() === "application/json";
+    && request.headers.get("content-type")?.split(";")[0].trim().toLowerCase() === contentType;
 }
 
 export function createAuthService({ config, store, now = Date.now }: { config: AuthConfig | null; store: AuthStore; now?: () => number }) {

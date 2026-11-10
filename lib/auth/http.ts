@@ -33,11 +33,11 @@ export function createAuthHttp({ service, config, production, allowedMutation }:
   service: AuthService;
   config: AuthConfig | null;
   production: boolean;
-  allowedMutation: (request: Request, config: AuthConfig | null) => boolean;
+  allowedMutation: (request: Request, config: AuthConfig | null, contentType?: string) => boolean;
 }) {
-  function mutationError(request: Request) {
+  function mutationError(request: Request, contentType = "application/json") {
     if (!config) return privateJson({ error: "Admin authentication is not configured." }, 503);
-    if (!allowedMutation(request, config)) return privateJson({ error: "Request origin or content type is not allowed." }, 403);
+    if (!allowedMutation(request, config, contentType)) return privateJson({ error: "Request origin or content type is not allowed." }, 403);
     return null;
   }
   function cookie(token: string, maxAge: number) {
