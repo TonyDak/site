@@ -6,7 +6,9 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "deploy:cloudflare": "npx --yes wrangler@4.160.0 deploy --keep-vars",
+    "build:cloudflare": "node scripts/build-cloudflare.mjs",
+    "deploy:cloudflare": "wrangler deploy --keep-vars",
+    "preview:cloudflare": "opennextjs-cloudflare preview",
     "lint": "eslint",
     "test": "node --disable-warning=MODULE_TYPELESS_PACKAGE_JSON --import ./tests/register-ts.mjs --test tests/*.test.mjs",
     "admin:setup": "node --disable-warning=MODULE_TYPELESS_PACKAGE_JSON scripts/admin-setup.mjs",
@@ -25,9 +27,16 @@
   "overrides": {
     "@typescript-eslint/typescript-estree": {
       "minimatch": "11.0.1"
+    },
+    "@opennextjs/cloudflare": {
+      "glob": "14.0.4"
+    },
+    "@node-minify/core": {
+      "glob": "14.0.4"
     }
   },
   "devDependencies": {
+    "@opennextjs/cloudflare": "1.20.16",
     "@tailwindcss/postcss": "^4",
     "@types/node": "^20",
     "@types/react": "^19",
@@ -36,6 +45,7 @@
     "eslint": "^9",
     "eslint-config-next": "16.4.6",
     "tailwindcss": "^4",
-    "typescript": "^5"
+    "typescript": "^5",
+    "wrangler": "4.160.0"
   }
 }

@@ -1,0 +1,41 @@
+{
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "site",
+  "main": ".open-next/worker.js",
+  "compatibility_date": "2026-11-10",
+  "compatibility_flags": [
+    "nodejs_compat",
+    "global_fetch_strictly_public"
+  ],
+  "keep_vars": true,
+  "build": {
+    "command": "npm run build:cloudflare"
+  },
+  "assets": {
+    "directory": ".open-next/assets",
+    "binding": "ASSETS"
+  },
+  "services": [
+    {
+      "binding": "WORKER_SELF_REFERENCE",
+      "service": "site"
+    }
+  ],
+  "secrets": {
+    "required": [
+      "MONGODB_URI",
+      "ADMIN_PASSWORD_HASH",
+      "R2_ACCESS_KEY_ID",
+      "R2_SECRET_ACCESS_KEY"
+    ]
+  },
+  "vars": {
+    "NEXT_PUBLIC_SITE_URL": "https://www.ducnh.tech",
+    "ADMIN_ORIGIN": "https://www.ducnh.tech",
+    "MONGODB_DB": "my_portfolio",
+    "ADMIN_USERNAME": "tonydev",
+    "R2_ACCOUNT_ID": "754d37bc4e6db148505f9adb066a0baa",
+    "R2_BUCKET_NAME": "blog",
+    "R2_PUBLIC_URL": "https://media.ducnh.tech"
+  }
+}

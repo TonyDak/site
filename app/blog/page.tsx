@@ -1,10 +1,10 @@
 import { getPosts } from "@/lib/content/posts";
 import { IdeShell } from "@/components/ide/IdeShell";
 import { BlogListClient } from "./BlogListClient";
-
-export const revalidate = 60;
+import { connection } from "next/server";
 
 export default async function BlogPage() {
+  await connection();
   const posts = await getPosts();
 
   const outline = posts.map((p) => ({

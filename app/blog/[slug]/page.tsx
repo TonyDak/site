@@ -2,22 +2,17 @@ import { notFound } from "next/navigation";
 import { parseMarkdown } from "@/lib/content/markdown";
 import { ArticleContent, ArticleCover } from "@/components/blog/ArticleContent";
 import { TransitionLink as Link } from "@/components/motion/TransitionLink";
-import { getPostBySlug, getPosts } from "@/lib/content/posts";
+import { getPostBySlug } from "@/lib/content/posts";
+import { connection } from "next/server";
 import { IdeShell, type OutlineItem } from "@/components/ide/IdeShell";
 import { Icon } from "@/components/ide/icons";
-
-export const revalidate = 60;
-
-export async function generateStaticParams() {
-  const posts = await getPosts();
-  return posts.map((p) => ({ slug: p.slug }));
-}
 
 export default async function BlogPostPage({
   params,
 }: {
   params: Promise<{ slug: string }>;
 }) {
+  await connection();
   const { slug } = await params;
   const post = await getPostBySlug(slug);
 

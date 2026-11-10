@@ -25,16 +25,18 @@ test('public index/direct-slug reads exclude drafts; authenticated reader can re
 });
 test('missing database cannot read admin drafts or claim a successful save', async () => {
   globalThis.__postTestDb = null;
+  await assert.rejects(() => getPosts(), /Article storage is temporarily unavailable/);
+  await assert.rejects(() => getPostBySlug('orca-cai-dat-orchestration-tiet-kiem-quota'), /Article storage is temporarily unavailable/);
   await assert.rejects(() => getPosts({ includeDrafts: true }));
   assert.equal((await savePost(docs[1])).success, false);
   assert.equal(writes, 0);
 });
-test('a truly empty database preserves bundled public articles without seeding storage', async () => {
+test('a truly empty database stays empty without inserting or substituting examples', async () => {
   globalThis.__postTestDb = { collection: () => ({
     find: () => ({ sort: () => ({ toArray: async () => [] }) }),
     countDocuments: async () => 0,
   }) };
-  assert.ok((await getPosts()).length > 0);
+  assert.deepEqual(await getPosts(), []);
   assert.equal((await getPosts({ includeDrafts: true })).length, 0);
   assert.equal(writes, 0);
 });
@@ -44,4 +46,9 @@ test('an all-draft database must not expose either drafts or unrelated bundled a
     countDocuments: async () => 1,
   }) };
   assert.deepEqual(await getPosts(), []);
+});
+test('failed storage cannot masquerade as sample posts or a missing article', async () => {
+  globalThis.__postTestDb = { collection: () => ({ find: () => ({ sort: () => ({ toArray: async () => { throw Error('private-driver-message'); } }) }) }) };
+  await assert.rejects(() => getPosts(), error => error.message === 'Article storage is temporarily unavailable.');
+  await assert.rejects(() => getPostBySlug('orca-cai-dat-orchestration-tiet-kiem-quota'), /Article storage is temporarily unavailable/);
 });

@@ -44,3 +44,10 @@ test('missing database configuration does not open a client or execute the callb
   try { assert.equal(await withDb(async () => { throw Error('must not run'); }), null); }
   finally { process.env.MONGODB_URI = previous; }
 });
+test('a missing database name cannot silently connect to a different default database', async () => {
+  const previous=process.env.MONGODB_DB; delete process.env.MONGODB_DB;
+  let opened=false;
+  globalThis.__createMongoTestClient=()=>{opened=true;return {async connect(){},db:()=>({}),async close(){}};};
+  try {assert.equal(await withDb(async()=>true),null);assert.equal(opened,false);}
+  finally {process.env.MONGODB_DB=previous;}
+});

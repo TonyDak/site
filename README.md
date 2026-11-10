@@ -38,11 +38,11 @@ CONTACT_TO_EMAIL=you@your-domain.com
 CONTACT_FROM_EMAIL=Portfolio Bot <noreply@your-domain.com>
 ```
 
-Profile, skills and project content live in `lib/content/data.ts`. Blog content and admin sessions use MongoDB. Admin access fails closed without the required database/auth configuration. Public blog reads may use bundled articles when storage is unavailable.
+Profile, skills and project content live in `lib/content/data.ts`. Blog content and admin sessions use MongoDB. Database URI and exact database name are mandatory. Missing or failed storage denies admin access and shows a retry state for public blog reads; sample articles are not substituted.
 
 For secured admin setup, password reset and the prepared Cloudflare configuration for `https://www.ducnh.tech`, see [Cloudflare environment](docs/cloudflare-env.md). Local ignored files `.env.cloudflare` and `.cloudflare.secrets.json` contain the deployment values; `.env.example` is the safe template.
 
-For an existing Cloudflare Workers deploy using `wrangler deploy`, use `npm run deploy:cloudflare` to preserve dashboard runtime variables with `--keep-vars`. Update the Cloudflare Workers Builds Deploy command to use it; a local package script does not change Dashboard settings automatically. Preserve any custom build/adapter steps. See the Cloudflare environment guide above for details.
+Cloudflare deployment uses the committed `wrangler.jsonc` and OpenNext adapter. The existing Workers Builds Deploy command `npx wrangler deploy` can remain: the configuration builds the Worker, persists non-secret runtime settings and keeps Dashboard variables. Runtime secret names are required without committing their values. `npm run deploy:cloudflare` is the equivalent local command. Use Linux/WSL for full OpenNext builds; see the Cloudflare environment guide above.
 
 If Resend variables are not provided, contact submissions are accepted and logged but email delivery is skipped.
 

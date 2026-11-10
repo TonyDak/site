@@ -1,9 +1,11 @@
 import type { MetadataRoute } from "next";
 import { getPosts } from "@/lib/content/posts";
+import { connection } from "next/server";
 
 const siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? "http://localhost:3000";
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
+  await connection();
   const posts = await getPosts();
 
   const staticRoutes = ["", "/blog"].map((path) => ({
