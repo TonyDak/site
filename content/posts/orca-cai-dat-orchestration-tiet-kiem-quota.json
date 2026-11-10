@@ -1,0 +1,8 @@
+{
+  "slug": "orca-cai-dat-orchestration-tiet-kiem-quota",
+  "title": "Orca: cài đặt, sử dụng orchestration đa agent và tối ưu quota",
+  "excerpt": "Hướng dẫn thực tế từ cài Orca, chuẩn bị agent và worktree đến viết brief, điều phối song song, chọn model/effort và sử dụng quota có chủ đích.",
+  "publishedAt": "2026-11-10",
+  "tags": ["Orca", "AI Agents", "Orchestration", "Developer Tools"],
+  "isPublished": true
+}

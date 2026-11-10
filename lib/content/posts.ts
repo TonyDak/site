@@ -1,4 +1,4 @@
-import { getDb } from "@/lib/db/mongo";
+import { withDb } from "@/lib/db/mongo";
 
 export type Post = {
   slug: string;
@@ -143,18 +143,17 @@ const fallbackPosts = SEED_POSTS.map(normalizePost).filter(p => p.isPublished !=
 
 export async function getPosts({ includeDrafts = false }: { includeDrafts?: boolean } = {}): Promise<Post[]> {
   try {
-    const db = await getDb();
-    if (!db) {
-      if (includeDrafts) throw new Error("Admin storage unavailable.");
-      return fallbackPosts;
-    }
-
-    const collection = db.collection<Post>("posts");
-    const docs = await collection.find(includeDrafts ? {} : { isPublished: { $ne: false } }).sort({ publishedAt: -1 }).toArray();
-    // Keep the pre-existing bundled public content for a fresh database, without writing on GET.
-    // An all-draft collection is intentionally empty to public readers.
-    if (!includeDrafts && docs.length === 0 && await collection.countDocuments({}, { limit: 1 }) === 0) return fallbackPosts;
-    return docs.map(normalizePost);
+    const posts = await withDb(async (db) => {
+      const collection = db.collection<Post>("posts");
+      const docs = await collection.find(includeDrafts ? {} : { isPublished: { $ne: false } }).sort({ publishedAt: -1 }).toArray();
+      // A genuinely empty database retains the public bundled examples without seeding on GET.
+      // An all-draft collection stays empty for public readers.
+      if (!includeDrafts && docs.length === 0 && await collection.countDocuments({}, { limit: 1 }) === 0) return fallbackPosts;
+      return docs.map(normalizePost);
+    });
+    if (posts !== null) return posts;
+    if (includeDrafts) throw new Error("Admin storage unavailable.");
+    return fallbackPosts;
   } catch (err) {
     if (includeDrafts) throw err;
     console.warn("[Posts] Public content storage unavailable; using bundled articles.");
@@ -170,18 +169,16 @@ export async function getPostBySlug(slug: string): Promise<Post | null> {
 export async function savePost(post: Post): Promise<{ success: boolean; error?: string }> {
   try {
     const normalized = normalizePost(post);
-    const db = await getDb();
-    if (!db) return { success: false, error: "Article storage unavailable." };
-    {
+    const saved = await withDb(async (db) => {
       const collection = db.collection<Post>("posts");
       await collection.updateOne(
         { slug: normalized.slug },
         { $set: normalized },
         { upsert: true }
       );
-    }
-
-    return { success: true };
+      return true;
+    });
+    return saved ? { success: true } : { success: false, error: "Article storage unavailable." };
   } catch (err) {
     return { success: false, error: (err as Error)?.message };
   }

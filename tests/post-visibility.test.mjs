@@ -3,7 +3,7 @@ import assert from 'node:assert/strict';
 import { registerHooks } from 'node:module';
 
 registerHooks({ resolve(specifier, context, nextResolve) {
-  if (specifier === '@/lib/db/mongo') return { url: 'data:text/javascript,export async function getDb(){return globalThis.__postTestDb;}', shortCircuit: true };
+  if (specifier === '@/lib/db/mongo') return { url: 'data:text/javascript,export async function withDb(operation){const db=globalThis.__postTestDb;return db?operation(db):null;}', shortCircuit: true };
   return nextResolve(specifier, context);
 } });
 const { getPosts, getPostBySlug, savePost } = await import('../lib/content/posts.ts');

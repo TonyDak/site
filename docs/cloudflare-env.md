@@ -43,6 +43,14 @@ This is a full Next.js application with authenticated API routes and MongoDB; a 
 
 The repository now pins Next.js and eslint-config-next to 16.4.6, after the security dependency update. This satisfies the checked `@opennextjs/cloudflare` 1.20.16 peer range `>=15.5.29 <16 || >=16.4.5`. The Cloudflare adapter is still not installed/configured in this repository, and no cloud deployment was performed as part of preparing these environment files. See [Cloudflare's Next.js runtime guide](https://developers.cloudflare.com/workers/framework-guides/web-apps/opennext/).
 
+The lockfile also updates the affected runtime/transitive packages. A development-only override pins minimatch 11.0.1 beneath `@typescript-eslint/typescript-estree`, whose current upstream range still selects vulnerable minimatch 10.2.6. This closes [GHSA-g3hv-75wg-m249](https://github.com/isaacs/minimatch/security/advisories/GHSA-g3hv-75wg-m249); recheck the override when typescript-eslint updates its dependency. Fresh-install lint, typecheck, tests and Next.js build are the compatibility checks for this override. An already-running local dev server must be restarted with dependencies installed from the updated lockfile to use the new framework version.
+
+### MongoDB connection lifetime on Workers
+
+`lib/db/mongo.ts` uses `withDb`: create a client for one database operation, await all queries, and close the client in `finally`. Blog reads/writes, admin session storage and status checks execute inside that callback. Do not return a live Db/Collection/cursor from it or cache Mongo clients, connection promises or index-creation I/O promises in module/global scope. Plain Workers cannot reuse request-owned I/O across requests. See [Cloudflare's MongoDB guidance](https://developers.cloudflare.com/workers/databases/third-party-integrations/mongodb/).
+
+Before the fix, the local workerd probe using the actual helper/driver produced 200, then the same “Worker's code had hung” cancellation as production, then 200 on repeated reads. After the fix, eight sequential and four concurrent read-only probes all returned 200 and found the published article. This validates the reproduced database lifecycle issue; it does not certify all Next.js adapter/RSC behavior or the deployed version. Deploy the updated source, then check repeated article HTML and RSC navigation requests in the real Worker logs. Direct connections add per-operation connection overhead, an acceptable tradeoff for this low-traffic portfolio; a Durable Object connection proxy would be a separate future optimization.
+
 After deployment, verify HTTPS login, refresh, logout/replay rejection, failed-login throttling, MongoDB connectivity, and draft visibility on the real Worker. Local synthetic tests are not proof of production acceptance.
 
 ## Password reset
