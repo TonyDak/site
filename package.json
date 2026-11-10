@@ -7,7 +7,7 @@
     "build": "next build",
     "start": "next start",
     "build:cloudflare": "node scripts/build-cloudflare.mjs",
-    "deploy:cloudflare": "wrangler deploy --keep-vars",
+    "deploy:cloudflare": "wrangler deploy --config wrangler.jsonc --keep-vars",
     "preview:cloudflare": "opennextjs-cloudflare preview",
     "lint": "eslint",
     "test": "node --disable-warning=MODULE_TYPELESS_PACKAGE_JSON --import ./tests/register-ts.mjs --test tests/*.test.mjs",

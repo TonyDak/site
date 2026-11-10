@@ -42,7 +42,7 @@ Profile, skills and project content live in `lib/content/data.ts`. Blog content 
 
 For secured admin setup, password reset and the prepared Cloudflare configuration for `https://www.ducnh.tech`, see [Cloudflare environment](docs/cloudflare-env.md). Local ignored files `.env.cloudflare` and `.cloudflare.secrets.json` contain the deployment values; `.env.example` is the safe template.
 
-Cloudflare deployment uses the committed `wrangler.jsonc` and OpenNext adapter. The existing Workers Builds Deploy command `npx wrangler deploy` can remain: the configuration builds the Worker, persists non-secret runtime settings and keeps Dashboard variables. Runtime secret names are required without committing their values. `npm run deploy:cloudflare` is the equivalent local command. Use Linux/WSL for full OpenNext builds; see the Cloudflare environment guide above.
+Cloudflare deployment uses the committed `wrangler.jsonc` and OpenNext adapter. Set Workers Builds **Deploy command** to `npm run deploy:cloudflare` (equivalent to `npx wrangler deploy --config wrangler.jsonc --keep-vars`). The explicit config is required: bare `wrangler deploy` delegates to OpenNext before running the build hook and fails on a clean checkout. The configuration builds the Worker, persists non-secret settings and keeps Dashboard variables. Runtime secret names are required without committing their values. Use Linux/WSL for full OpenNext builds; see the Cloudflare environment guide above.
 
 If Resend variables are not provided, contact submissions are accepted and logged but email delivery is skipped.
 

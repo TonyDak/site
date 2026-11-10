@@ -37,7 +37,9 @@ Cloudflare runtime secrets and Build variables are different settings. Public ca
 
 ### Keep runtime variables across deployments
 
-The committed `wrangler.jsonc` now configures the existing Worker `site`, `keep_vars: true`, its non-secret runtime settings, OpenNext output paths, Node compatibility and the build hook. The current Dashboard **Deploy command may remain `npx wrangler deploy`**. It now reads this configuration and runs `npm run build:cloudflare` before uploading. `npm run deploy:cloudflare` is the equivalent local command with an extra explicit `--keep-vars` flag.
+The committed `wrangler.jsonc` configures the existing Worker `site`, `keep_vars: true`, non-secret runtime settings, OpenNext output paths, Node compatibility and the build hook. Set the Dashboard **Deploy command to `npm run deploy:cloudflare`**. It explicitly selects `wrangler.jsonc` and runs `npm run build:cloudflare` before uploading. The equivalent direct command is `npx wrangler deploy --config wrangler.jsonc --keep-vars`.
+
+Do not use bare `npx wrangler deploy` here. With OpenNext installed, Wrangler delegates that command to `opennextjs-cloudflare deploy` before the custom build hook. On a clean CI checkout, OpenNext deploy cannot find `.open-next/.build/open-next.config.edge.mjs` and fails before building. Passing `--config wrangler.jsonc` disables that early delegation and allows Wrangler to run the build hook. A plain `--dry-run` also skips delegation, so an old dry-run success alone did not establish a correct cold deployment sequence. The exact old command was reproduced failing from an absent `.open-next` directory before validating the corrected command.
 
 The adapter and Wrangler versions are pinned in devDependencies. `open-next.config.ts` supplies the adapter configuration. `scripts/build-cloudflare.mjs` explicitly supplies the committed canonical public URL to the build; Wrangler runtime `vars` alone are not inherited by Next's build, and must not result in localhost metadata/robots output. Only the public URL is copied into the build environment. Merely exporting `.env.cloudflare` does not install runtime Secrets on the Worker.
 
