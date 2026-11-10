@@ -42,6 +42,8 @@ Profile, skills and project content live in `lib/content/data.ts`. Blog content 
 
 For secured admin setup, password reset and the prepared Cloudflare configuration for `https://www.ducnh.tech`, see [Cloudflare environment](docs/cloudflare-env.md). Local ignored files `.env.cloudflare` and `.cloudflare.secrets.json` contain the deployment values; `.env.example` is the safe template.
 
+For an existing Cloudflare Workers deploy using `wrangler deploy`, use `npm run deploy:cloudflare` to preserve dashboard runtime variables with `--keep-vars`. Update the Cloudflare Workers Builds Deploy command to use it; a local package script does not change Dashboard settings automatically. Preserve any custom build/adapter steps. See the Cloudflare environment guide above for details.
+
 If Resend variables are not provided, contact submissions are accepted and logged but email delivery is skipped.
 
 ## Important Routes

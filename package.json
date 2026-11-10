@@ -6,6 +6,7 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
+    "deploy:cloudflare": "npx --yes wrangler@4.160.0 deploy --keep-vars",
     "lint": "eslint",
     "test": "node --disable-warning=MODULE_TYPELESS_PACKAGE_JSON --import ./tests/register-ts.mjs --test tests/*.test.mjs",
     "admin:setup": "node --disable-warning=MODULE_TYPELESS_PACKAGE_JSON scripts/admin-setup.mjs",

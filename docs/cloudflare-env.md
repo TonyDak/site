@@ -35,7 +35,19 @@ Delete obsolete `ADMIN_PASSWORD` and `ADMIN_SECRET` on Cloudflare: the applicati
 
 Cloudflare runtime secrets and Build variables are different settings. Public canonical URL is needed during `next build`; admin credentials should remain runtime secrets, and should not be made available to untrusted pull-request builds.
 
-If using Wrangler with an already configured Worker, `wrangler secret bulk .cloudflare.secrets.json` imports only the three secret fields. This is a deployment action; it was not run by the coding agent. Set the remaining Text variables separately.
+### Keep runtime variables across deployments
+
+This repository provides `npm run deploy:cloudflare`, which runs `wrangler deploy --keep-vars` with a pinned Wrangler version. For a Workers Builds project currently deploying with `npx wrangler deploy`, set its **Deploy command** to `npm run deploy:cloudflare` (or append `--keep-vars` to the existing Wrangler deploy command). If the hosting project uses an OpenNext wrapper instead, preserve that command and forward the flag: `opennextjs-cloudflare deploy -- --keep-vars`. Do not replace a custom multi-step build/deploy command without checking what it does.
+
+There is intentionally no incomplete `wrangler.jsonc` here: a partial file could prevent Wrangler's existing framework auto-configuration. If the actual deployment generates/uses a Wrangler configuration, `"keep_vars": true` belongs in that configuration, or use the CLI flag above. Merely exporting `.env.cloudflare` does not install runtime variables on the Worker.
+
+Store `MONGODB_URI`, `ADMIN_PASSWORD_HASH`, `R2_ACCESS_KEY_ID` and `R2_SECRET_ACCESS_KEY` as **Secrets** in the production Worker's Settings > Variables and Secrets. Keep `MONGODB_DB`, `ADMIN_ORIGIN`, `ADMIN_USERNAME` and R2 account/bucket/public URL as Text variables; `--keep-vars` preserves dashboard-managed Text variables. Wrangler normally retains encrypted Secrets on deployment. If a Secret disappears too, verify its type, Worker name, production/preview environment and active deployment.
+
+Always restore the exact configured `MONGODB_DB`: this site's configured database differs from the helper's fallback name `portfolio`. A missing Text variable can therefore cause successful MongoDB ping checks but reads from the wrong database, showing bundled sample articles instead of Orca. After changing the deploy command, deploy and verify both `/api/status` and the actual Orca article.
+
+See [Wrangler configuration source of truth](https://developers.cloudflare.com/workers/wrangler/configuration/#source-of-truth). The dashboard Build/Deploy command is external state: adding the package script alone does not change it, and a deployment must actually use the preserving command.
+
+If using Wrangler with an already configured Worker, `wrangler secret bulk .cloudflare.secrets.json` imports only the configured secret fields (including R2 credentials when present). This is a deployment action; it was not run by the coding agent. Set the remaining Text variables separately.
 
 Official documentation: [Cloudflare secrets](https://developers.cloudflare.com/workers/configuration/secrets/) and [environment variables](https://developers.cloudflare.com/workers/configuration/environment-variables/).
 
