@@ -27,3 +27,10 @@
   .c--route-transition { display: none; }
   .c--hero-depth-card { transform: none !important; }
 }
+
+/* Sliding active-tab indicator (replaces the per-tab ::before once JS places it). */
+.tabstrip { position: relative; }
+.tab-indicator { position: absolute; left: 0; top: 0; height: 2px; width: 0; background: var(--signature); opacity: 0; pointer-events: none; z-index: 2; transition: transform 320ms var(--ease), width 320ms var(--ease), opacity 160ms; will-change: transform, width; }
+.tabstrip[data-indicator="on"] .tab.active::before { opacity: 0; }
+.tab { transition: color 220ms var(--ease), background 220ms var(--ease); }
+.tab .ico { transition: color 220ms var(--ease), opacity 220ms var(--ease); }

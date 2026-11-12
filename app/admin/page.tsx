@@ -1,11 +1,35 @@
 "use client";
 
-import { useCallback, useEffect, useState, type FormEvent } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState, type FormEvent } from "react";
 import { PostMediaEditor } from "@/components/admin/PostMediaEditor";
 import { TransitionLink as Link } from "@/components/motion/TransitionLink";
 import { IdeShell } from "@/components/ide/IdeShell";
 import { Icon } from "@/components/ide/icons";
 import type { Post } from "@/lib/content/posts";
+
+type Draft = {
+  title: string;
+  slug: string;
+  excerpt: string;
+  tags: string;
+  content: string;
+  coverImage: string;
+  coverAlt: string;
+  isPublished: boolean;
+};
+
+const EMPTY_DRAFT: Draft = { title: "", slug: "", excerpt: "", tags: "", content: "## Introduction\n\n", coverImage: "", coverAlt: "", isPublished: false };
+
+const toDraft = (p: Post): Draft => ({
+  title: p.title,
+  slug: p.slug,
+  excerpt: p.excerpt ?? "",
+  tags: (p.tags ?? []).join(", "),
+  content: p.content ?? "",
+  coverImage: p.coverImage ?? "",
+  coverAlt: p.coverAlt ?? "",
+  isPublished: p.isPublished !== false,
+});
 
 export default function AdminPage() {
   const [authed, setAuthed] = useState(false);
@@ -29,19 +53,33 @@ export default function AdminPage() {
   const [saving, setSaving] = useState(false);
   const [isPublished, setIsPublished] = useState(false);
   const [msg, setMsg] = useState<{ text: string; ok: boolean } | null>(null);
+  const [query, setQuery] = useState("");
+  const [savedSnapshot, setSavedSnapshot] = useState("");
+  const formRef = useRef<HTMLFormElement>(null);
 
-  const loadPost = useCallback((p: Post) => {
-    setCurrentSlug(p.slug);
-    setTitle(p.title);
-    setSlug(p.slug);
-    setExcerpt(p.excerpt ?? "");
-    setTags((p.tags ?? []).join(", "));
-    setContent(p.content ?? "");
-    setCoverImage(p.coverImage ?? ""); setCoverAlt(p.coverAlt ?? "");
-    setEditorRevision(value => value + 1);
-    setIsPublished(p.isPublished !== false);
+  const snapshot = useMemo(
+    () => JSON.stringify({ title, slug, excerpt, tags, content, coverImage, coverAlt, isPublished } satisfies Draft),
+    [title, slug, excerpt, tags, content, coverImage, coverAlt, isPublished]
+  );
+  const dirty = authed && snapshot !== savedSnapshot;
+  const confirmDiscard = () => !dirty || window.confirm("You have unsaved changes. Discard them?");
+
+  const applyDraft = useCallback((d: Draft, slugOfSaved: string) => {
+    setCurrentSlug(slugOfSaved);
+    setTitle(d.title);
+    setSlug(d.slug);
+    setExcerpt(d.excerpt);
+    setTags(d.tags);
+    setContent(d.content);
+    setCoverImage(d.coverImage);
+    setCoverAlt(d.coverAlt);
+    setIsPublished(d.isPublished);
+    setEditorRevision((value) => value + 1);
+    setSavedSnapshot(JSON.stringify(d));
     setMsg(null);
   }, []);
+
+  const loadPost = useCallback((p: Post) => applyDraft(toDraft(p), p.slug), [applyDraft]);
 
   const loadPosts = useCallback(async (selectFirst = false, signal?: AbortSignal) => {
     const response = await fetch("/api/admin/posts", { cache: "no-store", signal });
@@ -55,8 +93,11 @@ export default function AdminPage() {
       throw new Error(data.error || "Could not load posts.");
     }
     setPosts(data.posts);
-    if (selectFirst && data.posts.length) loadPost(data.posts[0]);
-  }, [loadPost]);
+    if (selectFirst) {
+      if (data.posts.length) loadPost(data.posts[0]);
+      else applyDraft(EMPTY_DRAFT, "");
+    }
+  }, [applyDraft, loadPost]);
 
   useEffect(() => {
     const controller = new AbortController();
@@ -81,16 +122,41 @@ export default function AdminPage() {
   }, [loadPosts]);
 
   const newPost = () => {
-    setCurrentSlug("");
-    setTitle("");
-    setSlug("");
-    setExcerpt("");
-    setTags("Architecture, Backend");
-    setContent("## Introduction\n\nWrite article content here...");
-    setIsPublished(false);
-    setCoverImage(""); setCoverAlt(""); setEditorRevision(value => value + 1);
-    setMsg(null);
+    if (!confirmDiscard()) return;
+    applyDraft(EMPTY_DRAFT, "");
   };
+
+  const openPost = (p: Post) => {
+    if (p.slug === currentSlug || !confirmDiscard()) return;
+    loadPost(p);
+  };
+
+  // Warn before closing the browser tab with unsaved edits.
+  useEffect(() => {
+    if (!dirty) return;
+    const onUnload = (e: BeforeUnloadEvent) => { e.preventDefault(); e.returnValue = ""; };
+    window.addEventListener("beforeunload", onUnload);
+    return () => window.removeEventListener("beforeunload", onUnload);
+  }, [dirty]);
+
+  // Ctrl/Cmd+S saves from anywhere on the page.
+  useEffect(() => {
+    if (!authed) return;
+    const onKey = (e: KeyboardEvent) => {
+      if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === "s") {
+        e.preventDefault();
+        formRef.current?.requestSubmit();
+      }
+    };
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, [authed]);
+
+  const visiblePosts = useMemo(() => {
+    const q = query.trim().toLowerCase();
+    if (!q) return posts;
+    return posts.filter((p) => p.title.toLowerCase().includes(q) || p.slug.includes(q) || (p.tags ?? []).some((t) => t.toLowerCase().includes(q)));
+  }, [posts, query]);
 
   const handleTitleChange = (val: string) => {
     setTitle(val);
@@ -98,6 +164,9 @@ export default function AdminPage() {
       setSlug(
         val
           .toLowerCase()
+          .normalize("NFD")
+          .replace(/[̀-ͯ]/g, "")
+          .replace(/đ/g, "d")
           .replace(/[^a-z0-9]+/g, "-")
           .replace(/(^-|-$)/g, "")
       );
@@ -123,6 +192,7 @@ export default function AdminPage() {
   };
 
   const handleLogout = async () => {
+    if (!confirmDiscard()) return;
     setAuthBusy(true);
     try {
       const response = await fetch("/api/admin/auth", { method: "DELETE", headers: { "Content-Type": "application/json" }, body: "{}" });
@@ -133,6 +203,7 @@ export default function AdminPage() {
       setPassword("");
       setTitle(""); setSlug(""); setContent(""); setExcerpt(""); setTags(""); setCurrentSlug("");
       setCoverImage(""); setCoverAlt("");
+      setSavedSnapshot("");
       setMsg(null);
       setAuthError("");
     } catch (error) { setMsg({ text: (error as Error).message, ok: false }); }
@@ -144,6 +215,7 @@ export default function AdminPage() {
     if (mediaBusy || saving) return;
     setSaving(true);
     setMsg(null);
+    const savingSnapshot = snapshot;
 
     try {
       const res = await fetch("/api/admin/posts", {
@@ -174,9 +246,8 @@ export default function AdminPage() {
         throw new Error(data.error || "Save failed");
       }
 
-      setMsg({ text: "Post saved to MongoDB successfully.", ok: true });
-
-      // Refresh list
+      setSavedSnapshot(savingSnapshot);
+      setMsg({ text: isPublished ? "Saved & published." : "Draft saved.", ok: true });
       await loadPosts();
       setCurrentSlug(slug);
     } catch (err) {
@@ -237,87 +308,114 @@ export default function AdminPage() {
     );
   }
 
+  const statusText = saving ? "Saving…" : mediaBusy ? "Uploading…" : dirty ? "Unsaved changes" : currentSlug ? "All changes saved" : "New draft";
+
   return (
-    <IdeShell active="admin" crumb="studio.ts">
-      <div className="page-head" style={{ marginBottom: "18px" }}>
-        <div>
-          <div className="comment">
-            <span className="idx">STUDIO</span>
-            <span>studio.ts — Content management &amp; MongoDB storage</span>
-          </div>
-          <h1 className="h2" style={{ margin: 0 }}>
-            Post Studio
-          </h1>
-        </div>
-
-        <div style={{ display: "flex", gap: "8px" }}>
-          <button type="button" className="btn btn-sm btn-ghost" disabled={authBusy || saving || mediaBusy} onClick={handleLogout}>
-            {authBusy ? "Signing out..." : "Sign out"}
-          </button>
-          <button type="button" className="btn btn-sm btn-ghost" disabled={saving || mediaBusy} onClick={newPost}>
-            <Icon name="plus" size={13} /> New draft
-          </button>
-          <Link href="/blog" className="btn btn-sm btn-ghost">
-            <Icon name="eye" size={13} /> View blog
-          </Link>
-        </div>
-      </div>
-
+    <IdeShell active="admin" crumb={currentSlug ? `posts/${currentSlug}.md` : "posts/untitled.md"}>
       <div className="studio">
-        {/* Post List */}
-        <div className="panel">
-          <div className="panel-head">
-            <span>Posts ({posts.length})</span>
-            <Icon name="database" size={13} />
+        {/* Post list */}
+        <aside className="panel studio-side">
+          <div className="studio-side-head">
+            <button type="button" className="btn btn-sm btn-cobalt" disabled={saving || mediaBusy} onClick={newPost}>
+              <Icon name="plus" size={13} /> New post
+            </button>
+            <input className="input studio-search" type="search" placeholder={`Search ${posts.length} posts…`} value={query} onChange={(e) => setQuery(e.target.value)} aria-label="Search posts" />
           </div>
           <div className="studio-list">
-            {posts.map((p) => (
+            {!currentSlug && (
+              <div className="studio-item on" aria-current="true">
+                <span className="t">{title || "Untitled draft"}</span>
+                <span className="m"><span className="badge draft">new</span></span>
+              </div>
+            )}
+            {visiblePosts.map((p) => (
               <button
                 type="button"
                 key={p.slug}
                 className={`studio-item ${currentSlug === p.slug ? "on" : ""}`}
+                aria-current={currentSlug === p.slug ? "true" : undefined}
                 disabled={saving || mediaBusy}
-                onClick={() => loadPost(p)}
+                onClick={() => openPost(p)}
               >
                 <span className="t">{p.title}</span>
                 <span className="m">
+                  <span className={`badge ${p.isPublished === false ? "draft" : "live"}`}>{p.isPublished === false ? "draft" : "live"}</span>
                   <span>{p.publishedAt}</span>
-                  <span>·</span>
-                  <span>{p.readTime}</span>
                 </span>
               </button>
             ))}
+            {visiblePosts.length === 0 && query && <p className="studio-empty">No posts match “{query}”.</p>}
           </div>
-        </div>
+          <div className="studio-side-foot">
+            <Link href="/blog" className="btn btn-sm btn-ghost"><Icon name="eye" size={13} /> Blog</Link>
+            <button type="button" className="btn btn-sm btn-ghost" disabled={authBusy || saving || mediaBusy} onClick={handleLogout}>
+              <Icon name="logout" size={13} /> {authBusy ? "Signing out…" : "Sign out"}
+            </button>
+          </div>
+        </aside>
 
-        {/* Editor Form */}
-        <form className="panel form" onSubmit={handleSave} style={{ padding: "0" }}>
-          <div style={{ padding: "16px 20px 14px", display: "flex", flexDirection: "column", gap: "12px" }}>
-            <label className="field">
-              <span>TITLE</span>
-              <input
-                type="text"
-                className="input"
-                required
-                value={title}
-                onChange={(e) => handleTitleChange(e.target.value)}
-                placeholder="Article title..."
-              />
-            </label>
+        {/* Editor */}
+        <form ref={formRef} className="panel form studio-form" onSubmit={handleSave}>
+          <div className="studio-bar">
+            <span className={`studio-state ${dirty ? "dirty" : ""}`} role="status" aria-live="polite">
+              <i aria-hidden="true" /> {statusText}
+            </span>
+            {msg && (
+              <span className={`form-msg ${msg.ok ? "ok" : "err"}`}>
+                <Icon name={msg.ok ? "check" : "close"} size={13} style={{ verticalAlign: "-2px" }} /> {msg.text}
+              </span>
+            )}
+            <div className="studio-bar-actions">
+              <label className="studio-toggle" title="When on, the post is visible on the public blog">
+                <input type="checkbox" checked={isPublished} onChange={(e) => setIsPublished(e.target.checked)} />
+                <span className="track" aria-hidden="true"><span /></span>
+                {isPublished ? "Published" : "Draft"}
+              </label>
+              {currentSlug && (
+                <Link href={`/blog/${currentSlug}`} target="_blank" className="btn btn-sm btn-ghost">
+                  <Icon name="arrowUpRight" size={13} /> View
+                </Link>
+              )}
+              <button type="submit" className="btn btn-sm btn-cobalt" disabled={saving || mediaBusy || (!dirty && !!currentSlug)} title="Save (Ctrl+S)">
+                <Icon name="save" size={13} />
+                {saving ? "Saving…" : "Save"}
+                <kbd className="hide-sm">Ctrl S</kbd>
+              </button>
+            </div>
+          </div>
 
+          <div className="studio-meta">
+            <input
+              type="text"
+              className="studio-title"
+              required
+              value={title}
+              onChange={(e) => handleTitleChange(e.target.value)}
+              placeholder="Post title"
+              aria-label="Title"
+            />
+            <input
+              type="text"
+              className="studio-excerpt"
+              value={excerpt}
+              onChange={(e) => setExcerpt(e.target.value)}
+              placeholder="One-line summary shown on the blog index…"
+              aria-label="Excerpt"
+            />
             <div className="form-row">
               <label className="field">
-                <span>SLUG</span>
+                <span>URL · /blog/</span>
                 <input
                   type="text"
                   className="input mono"
                   required
                   value={slug}
+                  readOnly={!!currentSlug}
+                  title={currentSlug ? "A saved post's slug is fixed: changing it would create a duplicate post." : undefined}
                   onChange={(e) => setSlug(e.target.value)}
                   placeholder="post-slug"
                 />
               </label>
-
               <label className="field">
                 <span>TAGS (COMMA-SEPARATED)</span>
                 <input
@@ -329,56 +427,11 @@ export default function AdminPage() {
                 />
               </label>
             </div>
-
-            <label className="field">
-              <span>EXCERPT</span>
-              <input
-                type="text"
-                className="input"
-                value={excerpt}
-                onChange={(e) => setExcerpt(e.target.value)}
-                placeholder="Short summary for the index card..."
-              />
-            </label>
-            <label style={{ display: "flex", gap: "8px", alignItems: "center", fontSize: "13px" }}>
-              <input type="checkbox" checked={isPublished} onChange={(e) => setIsPublished(e.target.checked)} />
-              Published — visible on the public blog
-            </label>
           </div>
 
           <PostMediaEditor key={editorRevision} content={content} onChange={setContent}
             coverImage={coverImage} coverAlt={coverAlt} onCover={setCoverImage} onCoverAlt={setCoverAlt}
             onBusy={setMediaBusy} disabled={saving || authBusy} />
-
-          <div
-            style={{
-              padding: "14px 20px",
-              borderTop: "1px solid var(--line)",
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "space-between",
-            }}
-          >
-            <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
-              <button type="submit" className="btn btn-cobalt" disabled={saving || mediaBusy}>
-                <Icon name="save" size={14} />
-                {saving ? "Writing to MongoDB..." : "Save to MongoDB"}
-              </button>
-
-              {currentSlug && (
-                <Link href={`/blog/${currentSlug}`} target="_blank" className="chip-btn">
-                  <Icon name="eye" size={12} /> View live
-                </Link>
-              )}
-            </div>
-
-            {msg && (
-              <span className={`form-msg ${msg.ok ? "ok" : "err"}`}>
-                <Icon name={msg.ok ? "check" : "close"} size={13} style={{ verticalAlign: "-2px" }} />
-                {msg.text}
-              </span>
-            )}
-          </div>
         </form>
       </div>
     </IdeShell>

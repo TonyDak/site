@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useRef, useState, useSyncExternalStore, type ReactNode } from "react";
+import { useCallback, useEffect, useLayoutEffect, useRef, useState, useSyncExternalStore, type ReactNode } from "react";
 import Image from "next/image";
 import { TransitionLink as Link } from "@/components/motion/TransitionLink";
 import { useLanguage } from "@/components/language/LanguageProvider";
@@ -59,6 +59,10 @@ export function IdeShell({ children, active, outline = [], tabs, activeTab, crum
 
   const editorRef = useRef<HTMLDivElement>(null);
   const tabstripRef = useRef<HTMLElement>(null);
+  const indicatorRef = useRef<HTMLSpanElement>(null);
+  // While a tab/outline click is smooth-scrolling, scroll-spy must not flip the
+  // active tab through every section it passes.
+  const spyLock = useRef<{ id: string; timer?: ReturnType<typeof setTimeout> } | null>(null);
   const [current, setCurrent] = useState<string>(outline[0]?.id ?? "");
   const [menuOpen, setMenuOpen] = useState(false);
   const theme = useSyncExternalStore(subscribeTheme, getTheme, getServerTheme);
@@ -72,7 +76,7 @@ export function IdeShell({ children, active, outline = [], tabs, activeTab, crum
         for (const e of entries) ratios.set(e.target.id, e.isIntersecting ? e.intersectionRatio : 0);
         let best: { id: string; r: number } | null = null;
         for (const [id, r] of ratios) if (r > 0 && (!best || r > best.r)) best = { id, r };
-        if (best) setCurrent(best.id);
+        if (best && !spyLock.current) setCurrent(best.id);
       },
       { root, threshold: [0, 0.1, 0.25, 0.5, 0.75, 1], rootMargin: "0px 0px -40% 0px" }
     );
@@ -86,11 +90,24 @@ export function IdeShell({ children, active, outline = [], tabs, activeTab, crum
   const jump = useCallback((id: string) => {
     const el = document.getElementById(id);
     if (!el) return;
-    el.scrollIntoView({ behavior: window.matchMedia("(prefers-reduced-motion: reduce)").matches ? "auto" : "smooth", block: "start" });
-    history.replaceState(null, "", `#${id}`);
+    const root = editorRef.current;
+    const reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    if (spyLock.current?.timer) clearTimeout(spyLock.current.timer);
+    const release = () => {
+      if (spyLock.current?.timer) clearTimeout(spyLock.current.timer);
+      spyLock.current = null;
+      root?.removeEventListener("scrollend", release);
+    };
+    if (!reduced) {
+      spyLock.current = { id, timer: setTimeout(release, 1200) };
+      root?.addEventListener("scrollend", release, { once: true });
+    }
     setCurrent(id);
+    el.scrollIntoView({ behavior: reduced ? "auto" : "smooth", block: "start" });
+    history.replaceState(null, "", `#${id}`);
     setMenuOpen(false);
   }, []);
+  useEffect(() => () => { if (spyLock.current?.timer) clearTimeout(spyLock.current.timer); }, []);
 
   useEffect(() => {
     const followHash = () => {
@@ -130,12 +147,33 @@ export function IdeShell({ children, active, outline = [], tabs, activeTab, crum
   const crumbTail = crumb ?? outline.find((o) => o.id === current)?.label ?? "README.md";
   const workspaceName = active === "home" ? "portfolio" : active === "admin" ? "studio" : "blog";
 
-  useEffect(() => {
-    tabstripRef.current?.querySelector('[aria-current]')?.scrollIntoView({ block: "nearest", inline: "nearest", behavior: "instant" });
-  }, [currentTab]);
+  // Sliding active-tab indicator + keep the active tab visible in the strip.
+  useLayoutEffect(() => {
+    const strip = tabstripRef.current;
+    const bar = indicatorRef.current;
+    if (!strip || !bar) return;
+    const place = () => {
+      const tab = strip.querySelector<HTMLElement>(".tab.active");
+      if (!tab) { bar.style.opacity = "0"; return; }
+      bar.style.opacity = "1";
+      strip.dataset.indicator = "on";
+      bar.style.width = `${tab.offsetWidth}px`;
+      bar.style.transform = `translateX(${tab.offsetLeft}px)`;
+    };
+    place();
+    const tab = strip.querySelector<HTMLElement>(".tab.active");
+    if (tab) {
+      const left = tab.offsetLeft, right = left + tab.offsetWidth;
+      if (left < strip.scrollLeft) strip.scrollTo({ left, behavior: "smooth" });
+      else if (right > strip.scrollLeft + strip.clientWidth) strip.scrollTo({ left: right - strip.clientWidth, behavior: "smooth" });
+    }
+    const ro = new ResizeObserver(place);
+    ro.observe(strip);
+    return () => ro.disconnect();
+  }, [currentTab, editorTabs.length]);
 
   return (
-    <div className="shell">
+    <div className={`shell shell-${active}`}>
       <a href="#editor" className="skip-link">
         {t.skip}
       </a>
@@ -256,6 +294,7 @@ export function IdeShell({ children, active, outline = [], tabs, activeTab, crum
                 </Link>
               );
             })}
+            <span ref={indicatorRef} className="tab-indicator" aria-hidden="true" />
           </nav>
           <EditorBackdrop />
           <EditorDepth />

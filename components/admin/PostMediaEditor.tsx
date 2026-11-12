@@ -17,7 +17,19 @@ type Props = {
   disabled: boolean;
 };
 const labelText = (value: string) => value.replace(/[\[\]\\\r\n]/g, " ").trim();
-const assetMarkdown = (asset: MediaAsset) => asset.kind === "image"
+type FormatAction = { label: string; title: string; line?: string; wrap?: [string, string, string] };
+const FORMATS: FormatAction[] = [
+  { label: "H2", title: "Heading", line: "## " },
+  { label: "H3", title: "Sub-heading", line: "### " },
+  { label: "B", title: "Bold (Ctrl+B)", wrap: ["**", "**", "text"] },
+  { label: "I", title: "Italic (Ctrl+I)", wrap: ["_", "_", "text"] },
+  { label: "</>", title: "Inline code", wrap: ["`", "`", "code"] },
+  { label: "{ }", title: "Code block", wrap: ["\n```ts\n", "\n```\n", "// code"] },
+  { label: "•", title: "Bulleted list", line: "- " },
+  { label: "1.", title: "Numbered list", line: "1. " },
+  { label: "❝", title: "Quote", line: "> " },
+];
+const assetMarkdown =(asset: MediaAsset) => asset.kind === "image"
   ? `![${labelText(asset.name)}](${asset.url})`
   : asset.kind === "video" ? `[video](${asset.url})` : `[download: ${labelText(asset.name)}](${asset.url})`;
 
@@ -36,12 +48,38 @@ export function PostMediaEditor({ content, onChange, coverImage, coverAlt, onCov
   const [url, setUrl] = useState("");
   const [label, setLabel] = useState("");
   const [caption, setCaption] = useState("");
-  const [view, setView] = useState<"split" | "preview">("split");
+  const [view, setView] = useState<"write" | "split" | "preview">("split");
   useEffect(() => () => { controller.current?.abort(); onBusy(false); }, [onBusy]);
 
   function insert(snippet: string, selection?: [number, number]) {
     const [start, end] = selection ?? [textarea.current?.selectionStart ?? content.length, textarea.current?.selectionEnd ?? content.length];
     onChange(previous => `${previous.slice(0,start)}\n\n${snippet}\n\n${previous.slice(end)}`);
+  }
+
+  /** Wrap the selection (or a placeholder) with Markdown, keeping the caret inside. */
+  function format(before: string, after = before, placeholder = "text") {
+    const el = textarea.current;
+    if (!el) return;
+    const start = el.selectionStart, end = el.selectionEnd;
+    const picked = content.slice(start, end) || placeholder;
+    onChange(previous => previous.slice(0, start) + before + picked + after + previous.slice(end));
+    requestAnimationFrame(() => { el.focus(); el.setSelectionRange(start + before.length, start + before.length + picked.length); });
+  }
+
+  /** Prefix each selected line (headings, lists, quotes). */
+  function prefixLines(prefix: string) {
+    const el = textarea.current;
+    if (!el) return;
+    const start = content.lastIndexOf("\n", el.selectionStart - 1) + 1;
+    const end = el.selectionEnd;
+    const block = content.slice(start, end).split("\n").map(line => prefix + line).join("\n");
+    onChange(previous => previous.slice(0, start) + block + previous.slice(end));
+    requestAnimationFrame(() => { el.focus(); el.setSelectionRange(start, start + block.length); });
+  }
+
+  function applyFormat(f: FormatAction) {
+    if (f.line) prefixLines(f.line);
+    else if (f.wrap) format(f.wrap[0], f.wrap[1], f.wrap[2]);
   }
 
   async function upload(files: File[], asCover = false) {
@@ -106,12 +144,19 @@ export function PostMediaEditor({ content, onChange, coverImage, coverAlt, onCov
     <div className="media-toolbar">
       <input ref={mediaInput} type="file" multiple accept={MEDIA_ACCEPT} hidden disabled={disabled || busy} onChange={event => { void upload(Array.from(event.target.files ?? [])); event.target.value=""; }} />
       <input ref={coverInput} type="file" accept=".png,.jpg,.jpeg,.webp,.gif,.avif" hidden disabled={disabled || busy} onChange={event => { void upload(Array.from(event.target.files ?? []),true); event.target.value=""; }} />
-      <button type="button" className="btn btn-sm btn-cobalt" disabled={disabled || busy} onClick={() => mediaInput.current?.click()}>↑ Upload media</button>
-      <button type="button" className="btn btn-sm btn-ghost" disabled={disabled || busy} onClick={() => coverInput.current?.click()}>Choose cover</button>
-      {(["image","video","link","download"] as const).map(item => <button type="button" className="btn btn-sm btn-ghost" key={item} disabled={disabled || busy} aria-pressed={mode === item} onClick={() => { setMode(mode === item ? null : item); setMessage(""); }}>Insert {item}</button>)}
-      <button type="button" className="btn btn-sm btn-ghost" onClick={() => setView(view === "split" ? "preview" : "split")} aria-pressed={view === "preview"}>{view === "split" ? "Full preview" : "Split editor"}</button>
+      <div className="tool-group" role="group" aria-label="Formatting">
+        {FORMATS.map(f => <button type="button" key={f.title} className="tool-btn" title={f.title} aria-label={f.title} disabled={disabled || busy || view === "preview"} onClick={() => applyFormat(f)}>{f.label}</button>)}
+      </div>
+      <div className="tool-group" role="group" aria-label="Media">
+        <button type="button" className="tool-btn wide" disabled={disabled || busy} onClick={() => mediaInput.current?.click()} title="Upload images, videos or files (or drag & drop / paste)">↑ Upload</button>
+        <button type="button" className="tool-btn wide" disabled={disabled || busy} onClick={() => coverInput.current?.click()}>Cover</button>
+        {(["link","image","video","download"] as const).map(item => <button type="button" className="tool-btn wide" key={item} disabled={disabled || busy} aria-pressed={mode === item} title={`Insert ${item} by URL`} onClick={() => { setMode(mode === item ? null : item); setMessage(""); }}>+ {item}</button>)}
+      </div>
+      <div className="tool-group view-switch" role="group" aria-label="View">
+        {(["write","split","preview"] as const).map(v => <button type="button" key={v} className="tool-btn wide" aria-pressed={view === v} onClick={() => setView(v)}>{v[0].toUpperCase() + v.slice(1)}</button>)}
+      </div>
     </div>
-    <div className="media-hint">Drop files here or paste an image into the editor. Images ≤10 MB · videos ≤25 MB · PDF/ZIP ≤20 MB. Uploaded files are public, including files in drafts.</div>
+    <div className="media-hint" title="Uploaded files are public, including files in drafts.">Drag & drop or paste images straight into the editor · images ≤10 MB · videos ≤25 MB · PDF/ZIP ≤20 MB · uploads are public</div>
     {(busy || message) && <p className="media-status" role="status" aria-live="polite">{progress || message}</p>}
     {mode && <div className="media-insert">
       <label className="field"><span>{mode === "video" ? "YOUTUBE / VIMEO / MP4 / WEBM URL" : "URL"}</span><input className="input" type="url" value={url} onChange={event => setUrl(event.target.value)} placeholder="https://…" /></label>
@@ -121,12 +166,17 @@ export function PostMediaEditor({ content, onChange, coverImage, coverAlt, onCov
     </div>}
     {coverImage && <div className="media-cover-control"><ArticleCover url={coverImage} alt={coverAlt} /><label className="field"><span>COVER DESCRIPTION (ALT)</span><input className="input" maxLength={200} value={coverAlt} disabled={disabled || busy} onChange={event => onCoverAlt(event.target.value)} /></label><button type="button" className="btn btn-sm btn-ghost" disabled={disabled || busy} onClick={() => { onCover(""); onCoverAlt(""); }}>Remove cover</button></div>}
     {assets.length > 0 && <div className="media-assets" aria-label="Files uploaded in this editing session">{assets.map(asset => <div key={asset.key} className="media-asset">{asset.kind === "image" && <img src={asset.url} alt="" />}<span title={asset.name}>{asset.name}</span><button type="button" className="btn btn-sm btn-ghost" disabled={disabled || busy} onClick={() => insert(assetMarkdown(asset))}>Insert again</button>{asset.kind === "image" && <button type="button" className="btn btn-sm btn-ghost" disabled={disabled || busy} onClick={() => { onCover(asset.url); onCoverAlt(labelText(asset.name)); }}>Use as cover</button>}</div>)}</div>}
-    <div className={`split${view === "preview" ? " preview-only" : ""}`}>
-      {view === "split" && <textarea ref={textarea} aria-label="Article Markdown" className="textarea mono" required rows={18} value={content} disabled={disabled || busy} onChange={event => onChange(event.target.value)} onPaste={event => {
+    <div className={`split${view === "preview" ? " preview-only" : view === "write" ? " write-only" : ""}`}>
+      {view !== "preview" && <textarea ref={textarea} aria-label="Article Markdown" className="textarea mono" required rows={18} value={content} disabled={disabled || busy} onChange={event => onChange(event.target.value)} onKeyDown={event => {
+        if (!(event.ctrlKey || event.metaKey)) return;
+        const key = event.key.toLowerCase();
+        if (key === "b") { event.preventDefault(); format("**"); }
+        else if (key === "i") { event.preventDefault(); format("_"); }
+      }} onPaste={event => {
         const files = Array.from(event.clipboardData.files).filter(file => file.type.startsWith("image/"));
         if (files.length) { event.preventDefault(); void upload(files); }
       }} placeholder={'## Section Heading\n\nWrite Markdown here. Paste images or drop files to upload.'} />}
-      <div className="preview"><div className="label">READER PREVIEW</div><ArticleCover url={coverImage} alt={coverAlt} /><div className="prose"><ArticleContent content={content} /></div></div>
+      {view !== "write" && <div className="preview"><div className="label">READER PREVIEW</div><ArticleCover url={coverImage} alt={coverAlt} /><div className="prose"><ArticleContent content={content} /></div></div>}
     </div>
   </div>;
 }
